@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="background">#FFF5F7F7</color>
+    <color name="lockdown_background">#FF0E1417</color>
+    <color name="ic_launcher_background">#FF1F2A30</color>
+    <color name="ic_launcher_foreground">#FF9DD3C4</color>
+</resources>
