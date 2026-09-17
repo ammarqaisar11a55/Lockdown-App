@@ -1,13 +1,13 @@
-# FocusLock
+# Lockdown App
 
-FocusLock is an Android app that puts the phone into a **scheduled, hard-to-escape focus
+Lockdown App is an Android app that puts the phone into a **scheduled, hard-to-escape focus
 lockdown** — for example every weekday from 08:00 to 13:00. During a session only the apps you
 allow can be opened, Home returns to the focus screen, and the session cannot be ended from the app.
 
 It is built entirely on official Android device-management APIs (Device Owner, lock task mode,
 user restrictions). No root, no accessibility-service tricks, no overlays, no hidden APIs.
 
-> **Honest scope.** FocusLock makes voluntary escape very difficult; it does not and cannot control
+> **Honest scope.** Lockdown App makes voluntary escape very difficult; it does not and cannot control
 > every part of Android. Emergency calls, the power menu, the secure lock screen, recovery mode and
 > factory reset always remain available. See [Limitations](#limitations).
 
@@ -64,7 +64,7 @@ Details: [docs/architecture.md](docs/architecture.md) · [docs/scheduling.md](do
 
 ## Device Owner Setup
 
-Strong enforcement requires FocusLock to be the **Device Owner**. Android only allows this on a
+Strong enforcement requires Lockdown App to be the **Device Owner**. Android only allows this on a
 device with no accounts (typically freshly reset). For development:
 
 ```bash
@@ -82,7 +82,7 @@ Removal, troubleshooting and production provisioning (QR code / zero-touch):
 ## Lock Task Setup
 
 No manual lock task configuration is needed: during a session the Device Owner allowlists
-FocusLock, the default dialer and your allowed apps, sets the lock task features, and registers
+Lockdown App, the default dialer and your allowed apps, sets the lock task features, and registers
 the lockdown screen as the persistent HOME activity. Everything is removed when the session ends.
 See [docs/kiosk-mode.md](docs/kiosk-mode.md).
 
@@ -127,7 +127,7 @@ the test device; otherwise they are skipped. Full test plan and manual scenarios
 
 ## Limitations
 
-FocusLock distinguishes four capability levels throughout the docs:
+Lockdown App distinguishes four capability levels throughout the docs:
 
 - **GUARANTEED BY ANDROID API** — enforced by the platform once configured (e.g. lock task allowlist).
 - **SUPPORTED** — available through public APIs, with documented caveats.
@@ -138,7 +138,7 @@ Key points:
 
 - Without Device Owner, sessions use **screen pinning**, which the user can exit.
 - Emergency calls, the power menu, the secure lock screen, recovery mode and **factory reset** are
-  never blocked. A factory reset removes FocusLock.
+  never blocked. A factory reset removes Lockdown App.
 - On Android 14+, exact alarms are denied by default; until the user allows them a session may start
   up to about a minute late (the end is still enforced on time by the lockdown screen).
 - OEM battery management may delay background work.
@@ -157,10 +157,12 @@ a test procedure.
 
 ## Production Deployment
 
-- Distribute FocusLock to devices that are **provisioned during setup** (QR code, NFC, zero-touch or
+- Distribute Lockdown App to devices that are **provisioned during setup** (QR code, NFC, zero-touch or
   an EMM). Consumer phones that already have accounts cannot become fully managed without a reset.
 - The app implements the Android 10+ provisioning handshake (`GET_PROVISIONING_MODE`,
   `ADMIN_POLICY_COMPLIANCE`) and supports fully managed mode only.
+- The product name is "Lockdown App" (`app_name` in `strings.xml`); the technical package id is still
+  the placeholder `com.example.focuslock`.
 - Replace the placeholder identity: `applicationId`/`namespace` in `app/build.gradle.kts`, the
   hard-coded names in `AndroidDevicePolicyController.HOME_ALIAS_CLASS`, the lockdown
   `taskAffinity` in the manifest, and `app_name` in `strings.xml`.
@@ -169,6 +171,20 @@ a test procedure.
   device-management apps.
 
 See [docs/device-owner-setup.md](docs/device-owner-setup.md#production-deployment).
+
+## Design
+
+The UI implements the "Industry" design system from the Claude Design handoff: a steel-blue accent
+(`#5980A6`) on a light technical ground (`#F2F2F3`), Barlow Condensed headings over Barlow body
+text, hairline-bordered cards, a blueprint-framed "Focus today" card with registration marks, and
+Lucide icons at stroke 1.5. Light, Dark and System appearance are selectable in
+**Settings › Appearance**; the lockdown screen is always dark with a slow breathing glow (static when
+system animations are turned off).
+
+- Tokens: `ui/theme/Theme.kt` (`LockdownColors`, `LockdownType`, `LockdownScreenColors`)
+- Shared components: `ui/components/Components.kt`, icons in `ui/components/LucideIcons.kt`
+- Fonts: Barlow and Barlow Condensed are bundled in `app/src/main/res/font` under the SIL Open Font
+  License (`third_party/barlow/OFL.txt`), so no network access is needed.
 
 ## Project Structure
 

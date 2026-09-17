@@ -24,7 +24,7 @@ dependent · **N** = not possible for normal third-party apps.
 
 ### T3 — User launches another application
 - **Android capability:** lock task allowlist (G).
-- **Mitigation:** only FocusLock, the dialer and allowed apps can start; the lockdown screen launches only persisted allowed packages.
+- **Mitigation:** only Lockdown App, the dialer and allowed apps can start; the lockdown screen launches only persisted allowed packages.
 - **Remaining limitation:** allowed apps may themselves open other content (e.g. a browser inside an allowed app). Choose allowed apps carefully.
 - **Test:** `adb shell am start -a android.settings.SETTINGS` → "Activity not started"; tap an allowed app on the lockdown screen → it opens.
 
@@ -72,7 +72,7 @@ dependent · **N** = not possible for normal third-party apps.
 
 ### T11 — User escapes through notifications
 - **Android capability:** `LOCK_TASK_FEATURE_NOTIFICATIONS` not granted (G).
-- **Mitigation:** the notification shade and Quick Settings are unavailable in DO sessions; session notifications are minimal and only open FocusLock.
+- **Mitigation:** the notification shade and Quick Settings are unavailable in DO sessions; session notifications are minimal and only open Lockdown App.
 - **Remaining limitation:** no DO: the shade is reachable after unpinning.
 - **Test:** swipe down during a session → nothing expands.
 

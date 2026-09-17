@@ -22,16 +22,16 @@ class OnboardingScreenTest {
         var result: Boolean? = null
         rule.setContent { FocusLockTheme { OnboardingScreen(onRequestNotifications = {}, onFinish = { result = it }) } }
 
-        rule.onNodeWithText("Welcome to FocusLock").assertIsDisplayed()
-        rule.onNodeWithText("Get started").performScrollTo().performClick()
+        rule.onNodeWithText("Welcome to Lockdown App").assertIsDisplayed()
+        rule.onNodeWithText("GET STARTED").performClick()
 
         rule.onNodeWithText("How strong lockdown works").assertIsDisplayed()
         rule.onNodeWithText("Learn more").performScrollTo().performClick()
         rule.onNodeWithText("Show less").assertIsDisplayed()
-        rule.onNodeWithText("Continue").performScrollTo().performClick()
+        rule.onNodeWithText("CONTINUE").performClick()
 
         rule.onNodeWithText("Your safety comes first").assertIsDisplayed()
-        rule.onNodeWithText("Set up this device").performScrollTo().performClick()
+        rule.onNodeWithText("SET UP THIS DEVICE").performClick()
         assertEquals(true, result)
     }
 
@@ -39,9 +39,9 @@ class OnboardingScreenTest {
     fun canSkipSetup() {
         var result: Boolean? = null
         rule.setContent { FocusLockTheme { OnboardingScreen(onRequestNotifications = {}, onFinish = { result = it }) } }
-        rule.onNodeWithText("Get started").performScrollTo().performClick()
-        rule.onNodeWithText("Continue").performScrollTo().performClick()
-        rule.onNodeWithText("Not now").performScrollTo().performClick()
+        rule.onNodeWithText("GET STARTED").performClick()
+        rule.onNodeWithText("CONTINUE").performClick()
+        rule.onNodeWithText("Not now").performClick()
         assertEquals(false, result)
     }
 }

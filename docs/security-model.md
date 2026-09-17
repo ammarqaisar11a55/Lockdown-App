@@ -4,7 +4,7 @@
 
 > "You cannot voluntarily escape the focus session."
 
-Not: "the application controls every aspect of Android." FocusLock uses the strongest
+Not: "the application controls every aspect of Android." Lockdown App uses the strongest
 **legitimate** controls Android offers and documents every remaining escape path.
 
 ## Principles

@@ -20,6 +20,7 @@ import com.example.focuslock.testing.NoopLogger
 import com.example.focuslock.testing.WEDNESDAY
 import com.example.focuslock.testing.at
 import com.example.focuslock.testing.schedule
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -30,6 +31,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.time.Duration
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class PolicyReconciliationEngineTest {
 
     // "Device" state that survives process death.

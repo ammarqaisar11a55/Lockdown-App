@@ -1,6 +1,6 @@
 # Android Limitations
 
-What Android does and does not let FocusLock do. Levels:
+What Android does and does not let Lockdown App do. Levels:
 
 - **GUARANTEED BY ANDROID API** — enforced by the platform once configured.
 - **SUPPORTED** — public API with caveats.
@@ -22,7 +22,7 @@ What Android does and does not let FocusLock do. Levels:
 ## SUPPORTED
 
 - **Persistent HOME activity:** brings the lockdown screen back on Home and after boot.
-- **`BOOT_COMPLETED`:** delivered after the user unlocks the device once; FocusLock is not
+- **`BOOT_COMPLETED`:** delivered after the user unlocks the device once; Lockdown App is not
   direct-boot aware, so nothing runs before the first unlock (the device is locked anyway).
 - **Exact alarms:** `SCHEDULE_EXACT_ALARM` is user-grantable and **denied by default on
   Android 14+** for newly installed apps. Without it, alarms are inexact (observed window about
@@ -30,7 +30,7 @@ What Android does and does not let FocusLock do. Levels:
   `setPermissionGrantState`. `USE_EXACT_ALARM` is reserved by Play policy for alarm/calendar apps
   and is not used.
 - **Screen pinning (no Device Owner):** the user confirms it and can leave it (Back + Overview,
-  or as configured on the device). FocusLock counts exit attempts and offers a way back through
+  or as configured on the device). Lockdown App counts exit attempts and offers a way back through
   its notification, but cannot prevent leaving.
 - **Background activity starts:** Device Owner apps are exempt. Ordinary apps cannot bring the
   lockdown screen back from the background on Android 10+.
@@ -48,7 +48,7 @@ What Android does and does not let FocusLock do. Levels:
 
 ## NOT POSSIBLE FOR NORMAL THIRD-PARTY APPS
 
-- Blocking or delaying **emergency calls** — and FocusLock would not do it anyway.
+- Blocking or delaying **emergency calls** — and Lockdown App would not do it anyway.
 - Blocking **recovery mode**, bootloader access or fastboot.
 - Preventing **factory reset from recovery mode**, or surviving a factory reset.
 - Preventing the device from being **powered off** (the power menu stays available by design).

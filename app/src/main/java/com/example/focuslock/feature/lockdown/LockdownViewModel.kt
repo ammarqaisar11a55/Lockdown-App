@@ -29,6 +29,7 @@ import javax.inject.Inject
 data class LockdownDisplay(
     val sessionName: String,
     val remaining: Duration,
+    val total: Duration,
     val endTime: String,
     val currentTime: String,
     val dailyGoal: String,
@@ -79,6 +80,7 @@ class LockdownViewModel @Inject constructor(
             LockdownDisplay(
                 sessionName = session.name,
                 remaining = remaining,
+                total = session.duration,
                 endTime = DurationFormatter.time(session.end, zone),
                 currentTime = DurationFormatter.time(now, zone),
                 dailyGoal = settings.dailyGoal,

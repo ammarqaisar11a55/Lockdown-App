@@ -21,6 +21,7 @@ import com.example.focuslock.feature.schedule.TAG_ERROR
 import com.example.focuslock.feature.schedule.TAG_NAME
 import com.example.focuslock.feature.schedule.TAG_REVIEW
 import com.example.focuslock.feature.schedule.TAG_SAVE
+import com.example.focuslock.feature.schedule.TAG_STARTS_NOW
 import com.example.focuslock.feature.schedule.TAG_STRICT
 import com.example.focuslock.domain.model.FocusSchedule
 import com.example.focuslock.ui.theme.FocusLockTheme
@@ -76,12 +77,20 @@ class ScheduleEditorScreenTest {
         rule.onNodeWithTag(TAG_SAVE).performScrollTo().performClick()
 
         rule.onNodeWithTag(TAG_REVIEW).assertIsDisplayed()
+        rule.onNodeWithTag(TAG_STARTS_NOW).assertDoesNotExist()
         rule.onNodeWithText("you will not be able to voluntarily end the session", substring = true).assertIsDisplayed()
         assertEquals(false, state().finished)
 
-        rule.onNodeWithText("Confirm").performClick()
+        rule.onNodeWithText("CONFIRM").performClick()
         assertTrue(state().finished)
         assertEquals("University Study", state().form.name)
+    }
+
+    @Test
+    fun reviewWarnsWhenTheSessionWouldStartImmediately() {
+        setContent(ScheduleEditorUiState(loading = false, review = review, reviewStartsNow = true))
+        rule.onNodeWithTag(TAG_STARTS_NOW).assertIsDisplayed()
+        rule.onNodeWithText("locks the device right away", substring = true).assertIsDisplayed()
     }
 
     @Test
@@ -104,7 +113,7 @@ class ScheduleEditorScreenTest {
         assertEquals(false, state().form.strictMode)
 
         rule.onNodeWithTag(TAG_STRICT).performScrollTo().performClick()
-        rule.onNodeWithText("Enable Strict mode").performClick()
+        rule.onNodeWithText("ENABLE STRICT MODE").performClick()
         assertEquals(true, state().form.strictMode)
     }
 

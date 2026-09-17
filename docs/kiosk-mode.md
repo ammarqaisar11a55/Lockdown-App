@@ -6,12 +6,12 @@ Applied by `LockdownPolicyEnforcer.apply()` when a session starts and removed by
 
 | Setting | API | Purpose |
 |---|---|---|
-| Lock task allowlist | `setLockTaskPackages` | FocusLock + default/system dialer + allowed apps only |
+| Lock task allowlist | `setLockTaskPackages` | Lockdown App + default/system dialer + allowed apps only |
 | Lock task features | `setLockTaskFeatures` | `GLOBAL_ACTIONS` (power menu), `KEYGUARD` (secure lock screen), `HOME`; `SYSTEM_INFO` in Standard mode only. `NOTIFICATIONS` and `OVERVIEW` are never enabled |
 | HOME override | `addPersistentPreferredActivity` + enabling the `LockdownHomeAlias` activity-alias | Home, and the first screen after boot, is the lockdown screen |
-| Uninstall block | `setUninstallBlocked` | FocusLock cannot be uninstalled |
+| Uninstall block | `setUninstallBlocked` | Lockdown App cannot be uninstalled |
 | User restrictions | `addUserRestriction` | See below |
-| Automatic time | `setAutoTimeEnabled` (API 30+) / `setAutoTimeRequired` | Network time stays on; restored afterwards if FocusLock turned it on |
+| Automatic time | `setAutoTimeEnabled` (API 30+) / `setAutoTimeRequired` | Network time stays on; restored afterwards if Lockdown App turned it on |
 
 User restrictions:
 

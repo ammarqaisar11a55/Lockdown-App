@@ -15,6 +15,10 @@ import java.util.Locale
 fun formatTime(time: LocalTime, locale: Locale = Locale.getDefault()): String =
     DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale).format(time)
 
+/** "8:00" / "20:00": time without the AM/PM marker, for compact labels. */
+fun formatShortTime(time: LocalTime, locale: Locale = Locale.getDefault()): String =
+    formatTime(time, locale).replace(Regex("[\\s\\u00a0\\u202f]?[AaPp]\\.?\\s?[Mm]\\.?"), "").trim()
+
 fun formatDays(days: Set<DayOfWeek>, locale: Locale = Locale.getDefault()): String =
     DayOfWeek.entries.filter { it in days }.joinToString(" ") { it.getDisplayName(TextStyle.SHORT, locale) }
 

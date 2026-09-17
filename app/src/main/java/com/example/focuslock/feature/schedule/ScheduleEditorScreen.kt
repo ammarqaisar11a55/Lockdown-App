@@ -1,43 +1,34 @@
 package com.example.focuslock.feature.schedule
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TimePicker
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDatePickerState
-import androidx.compose.material3.rememberTimePickerState
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -46,18 +37,40 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.focuslock.R
 import com.example.focuslock.domain.model.FocusSchedule
+import com.example.focuslock.ui.components.BackHeader
+import com.example.focuslock.ui.components.ChoiceChip
 import com.example.focuslock.ui.components.ConfirmDialog
-import com.example.focuslock.ui.components.SectionCard
+import com.example.focuslock.ui.components.FieldLabel
+import com.example.focuslock.ui.components.FlCard
+import com.example.focuslock.ui.components.FlDialog
+import com.example.focuslock.ui.components.FlTextField
+import com.example.focuslock.ui.components.HairlineDivider
+import com.example.focuslock.ui.components.IconAction
+import com.example.focuslock.ui.components.LucideIcons
+import com.example.focuslock.ui.components.MutedText
+import com.example.focuslock.ui.components.OutlineButton
+import com.example.focuslock.ui.components.PrimaryButton
+import com.example.focuslock.ui.components.SectionLabel
 import com.example.focuslock.ui.components.SwitchRow
+import com.example.focuslock.ui.components.TextAction
+import com.example.focuslock.ui.theme.LockdownType
 import com.example.focuslock.ui.theme.Spacing
+import com.example.focuslock.ui.theme.Tokens
 import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate
@@ -91,7 +104,6 @@ fun ScheduleEditorRoute(
 
 private enum class PickerTarget { START, END }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScheduleEditorScreen(
     state: ScheduleEditorUiState,
@@ -110,53 +122,46 @@ fun ScheduleEditorScreen(
     var showDeleteConfirm by rememberSaveable { mutableStateOf(false) }
     val form = state.form
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(stringResource(if (state.isEditing) R.string.editor_title_edit else R.string.editor_title_create))
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
-                    }
-                },
-                actions = {
-                    if (state.isEditing) {
-                        IconButton(onClick = { showDeleteConfirm = true }) {
-                            Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.action_delete))
-                        }
-                    }
-                },
-            )
-        },
-    ) { padding ->
+    Column(
+        Modifier
+            .fillMaxSize()
+            .background(Tokens.bg)
+            .statusBarsPadding()
+            .navigationBarsPadding()
+            .imePadding(),
+    ) {
+        BackHeader(
+            title = stringResource(if (state.isEditing) R.string.editor_title_edit else R.string.editor_title_create),
+            onBack = onBack,
+        ) {
+            if (state.isEditing) {
+                IconAction(LucideIcons.Trash, stringResource(R.string.action_delete), { showDeleteConfirm = true }, tint = Tokens.err)
+            }
+        }
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
                 .verticalScroll(rememberScrollState())
-                .padding(Spacing.md),
-            verticalArrangement = Arrangement.spacedBy(Spacing.md),
+                .padding(start = Spacing.screen, end = Spacing.screen, top = 10.dp, bottom = 30.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            OutlinedTextField(
-                value = form.name,
-                onValueChange = { value -> onFormChange { it.copy(name = value.take(NAME_INPUT_LIMIT)) } },
-                label = { Text(stringResource(R.string.editor_name)) },
-                placeholder = { Text(stringResource(R.string.editor_name_placeholder)) },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth().testTag(TAG_NAME),
-            )
+            Column {
+                FieldLabel(stringResource(R.string.editor_name))
+                FlTextField(
+                    value = form.name,
+                    onValueChange = { value -> onFormChange { it.copy(name = value.take(NAME_INPUT_LIMIT)) } },
+                    placeholder = stringResource(R.string.editor_name_placeholder),
+                    modifier = Modifier.testTag(TAG_NAME),
+                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                )
+            }
 
-            SectionCard {
+            FlCard(contentPadding = PaddingValues(horizontal = 16.dp, vertical = 6.dp)) {
                 TimeRow(stringResource(R.string.editor_start), form.start) { timePicker = PickerTarget.START }
+                HairlineDivider()
                 TimeRow(stringResource(R.string.editor_end), form.end) { timePicker = PickerTarget.END }
                 if (!form.end.isAfter(form.start) && form.end != form.start) {
-                    Text(
-                        stringResource(R.string.editor_overnight),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                    MutedText(stringResource(R.string.editor_overnight), Modifier.padding(bottom = 12.dp), LockdownType.caption)
                 }
             }
 
@@ -167,18 +172,28 @@ fun ScheduleEditorScreen(
                 onToggleDay = onToggleDay,
             )
 
-            SectionCard {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+            FlCard(contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 10.dp)) {
+                Row(
+                    Modifier.fillMaxWidth().padding(vertical = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
                     Column(Modifier.weight(1f)) {
-                        Text(stringResource(R.string.editor_allowed_apps), style = MaterialTheme.typography.bodyLarge)
-                        Text(
+                        Text(stringResource(R.string.editor_allowed_apps), style = LockdownType.body, color = Tokens.text)
+                        MutedText(
                             pluralStringResource(R.plurals.editor_allowed_apps_count, state.allowedAppCount, state.allowedAppCount),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            Modifier.padding(top = 2.dp),
+                            LockdownType.caption,
                         )
                     }
-                    OutlinedButton(onClick = onConfigureApps) { Text(stringResource(R.string.action_configure)) }
+                    OutlineButton(
+                        stringResource(R.string.action_configure),
+                        onConfigureApps,
+                        minHeight = 44.dp,
+                        textStyle = LockdownType.button.copy(fontSize = 12.5.sp),
+                    )
                 }
+                HairlineDivider()
                 SwitchRow(
                     title = stringResource(R.string.editor_strict),
                     subtitle = stringResource(R.string.editor_strict_subtitle),
@@ -188,6 +203,7 @@ fun ScheduleEditorScreen(
                     },
                     modifier = Modifier.testTag(TAG_STRICT),
                 )
+                HairlineDivider()
                 SwitchRow(
                     title = stringResource(R.string.editor_auto_start),
                     subtitle = stringResource(R.string.editor_auto_start_subtitle),
@@ -197,25 +213,25 @@ fun ScheduleEditorScreen(
             }
 
             state.error?.let {
-                Text(it.message(), color = MaterialTheme.colorScheme.error, modifier = Modifier.testTag(TAG_ERROR))
+                Text(it.message(), style = LockdownType.bodySmall, color = Tokens.err, modifier = Modifier.testTag(TAG_ERROR))
             }
             if (state.lockedBySession) {
-                Text(stringResource(R.string.editor_locked_by_session), color = MaterialTheme.colorScheme.error)
+                Text(stringResource(R.string.editor_locked_by_session), style = LockdownType.bodySmall, color = Tokens.err)
             }
 
-            Button(
+            PrimaryButton(
+                text = stringResource(if (state.isEditing) R.string.action_save_session else R.string.action_create_session),
                 onClick = onSave,
                 enabled = !state.loading && !state.saving,
-                modifier = Modifier.fillMaxWidth().testTag(TAG_SAVE),
-            ) {
-                Text(stringResource(if (state.isEditing) R.string.action_save_session else R.string.action_create_session))
-            }
-            Spacer(Modifier.height(Spacing.lg))
+                modifier = Modifier.fillMaxWidth().padding(top = 4.dp).testTag(TAG_SAVE),
+                textStyle = LockdownType.button.copy(fontSize = 14.sp),
+            )
         }
     }
 
     timePicker?.let { target ->
-        TimePickerDialog(
+        StepperTimeDialog(
+            title = stringResource(if (target == PickerTarget.START) R.string.editor_start_time else R.string.editor_end_time),
             initial = if (target == PickerTarget.START) form.start else form.end,
             onDismiss = { timePicker = null },
             onConfirm = { time ->
@@ -259,20 +275,27 @@ fun ScheduleEditorScreen(
             onDismiss = { showDeleteConfirm = false },
         )
     }
-    state.review?.let { ReviewDialog(it, onConfirmSave, onDismissReview) }
+    state.review?.let { ReviewDialog(it, state.reviewStartsNow, onConfirmSave, onDismissReview) }
 }
 
 @Composable
 private fun TimeRow(label: String, time: LocalTime, onClick: () -> Unit) {
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Text(label, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-        OutlinedButton(onClick = onClick, modifier = Modifier.defaultMinSize(minWidth = TIME_BUTTON_MIN_WIDTH)) {
-            Text(formatTime(time), style = MaterialTheme.typography.titleMedium)
-        }
+    Row(
+        Modifier.fillMaxWidth().padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text(label, style = LockdownType.body, color = Tokens.text, modifier = Modifier.weight(1f))
+        OutlineButton(
+            text = formatTime(time),
+            onClick = onClick,
+            minHeight = 44.dp,
+            modifier = Modifier.widthIn(min = 104.dp),
+            textStyle = LockdownType.cardTitle.copy(fontSize = 16.sp, fontFeatureSettings = "tnum"),
+        )
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun RepeatSection(
     form: ScheduleForm,
@@ -280,31 +303,49 @@ private fun RepeatSection(
     onPickDate: () -> Unit,
     onToggleDay: (DayOfWeek) -> Unit,
 ) {
-    SectionCard(title = stringResource(R.string.editor_repeat)) {
-        Column(Modifier.selectableGroup()) {
-            RepeatOption.entries.forEach { option ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .defaultMinSize(minHeight = Spacing.touchTarget)
-                        .selectable(selected = form.repeat == option, role = Role.RadioButton) { onRepeatChange(option) },
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    RadioButton(selected = form.repeat == option, onClick = null)
-                    Text(repeatOptionLabel(option), modifier = Modifier.padding(start = Spacing.sm))
+    FlCard {
+        SectionLabel(stringResource(R.string.editor_repeat))
+        Column(
+            Modifier.padding(top = 12.dp).selectableGroup(),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            RepeatOption.entries.chunked(2).forEach { pair ->
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    pair.forEach { option ->
+                        ChoiceChip(
+                            label = repeatOptionLabel(option),
+                            selected = form.repeat == option,
+                            onClick = { onRepeatChange(option) },
+                            modifier = Modifier.weight(1f),
+                            textAlign = TextAlign.Start,
+                        )
+                    }
                 }
             }
         }
         when (form.repeat) {
-            RepeatOption.ONCE -> OutlinedButton(onClick = onPickDate) {
-                Text(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(form.onceDate))
-            }
-            RepeatOption.CUSTOM -> FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+            RepeatOption.ONCE -> OutlineButton(
+                text = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(form.onceDate),
+                onClick = onPickDate,
+                modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                minHeight = 44.dp,
+                textStyle = LockdownType.cardTitle.copy(fontSize = 15.sp),
+            )
+            RepeatOption.CUSTOM -> Row(
+                Modifier.fillMaxWidth().padding(top = 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
                 DayOfWeek.entries.forEach { day ->
-                    FilterChip(
+                    ChoiceChip(
+                        label = day.getDisplayName(TextStyle.NARROW, Locale.getDefault()),
                         selected = day in form.customDays,
                         onClick = { onToggleDay(day) },
-                        label = { Text(day.getDisplayName(TextStyle.SHORT, Locale.getDefault())) },
+                        modifier = Modifier
+                            .weight(1f)
+                            .semantics { contentDescription = day.getDisplayName(TextStyle.FULL, Locale.getDefault()) },
+                        minHeight = 42.dp,
+                        textStyle = LockdownType.cardTitle.copy(fontSize = 12.sp),
+                        role = Role.Checkbox,
                     )
                 }
             }
@@ -324,40 +365,92 @@ private fun repeatOptionLabel(option: RepeatOption): String = stringResource(
 )
 
 @Composable
-private fun ReviewDialog(schedule: FocusSchedule, onConfirm: () -> Unit, onDismiss: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
+private fun ReviewDialog(schedule: FocusSchedule, startsNow: Boolean, onConfirm: () -> Unit, onDismiss: () -> Unit) {
+    FlDialog(
+        onDismiss = onDismiss,
+        title = stringResource(R.string.review_title),
+        confirmLabel = stringResource(R.string.action_confirm),
+        onConfirm = onConfirm,
         modifier = Modifier.testTag(TAG_REVIEW),
-        title = { Text(stringResource(R.string.review_title)) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-                Text(stringResource(R.string.review_body))
-                if (schedule.strictMode) Text(stringResource(R.string.review_strict), color = MaterialTheme.colorScheme.tertiary)
-                Text(schedule.name, style = MaterialTheme.typography.titleMedium)
-                Text(stringResource(R.string.review_start, formatTime(schedule.startTime)))
-                Text(stringResource(R.string.review_end, formatTime(schedule.endTime)))
-                Text(schedule.repeat.label())
+    ) {
+        val body = LockdownType.bodySmall.copy(fontSize = 14.sp, lineHeight = 22.sp)
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (startsNow) {
+                Text(
+                    stringResource(R.string.review_starts_now, formatTime(schedule.endTime)),
+                    style = body,
+                    color = Tokens.err,
+                    modifier = Modifier.testTag(TAG_STARTS_NOW),
+                )
             }
-        },
-        confirmButton = { TextButton(onClick = onConfirm) { Text(stringResource(R.string.action_confirm)) } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
-    )
+            Text(stringResource(R.string.review_body), style = body, color = Tokens.muted)
+            if (schedule.strictMode) Text(stringResource(R.string.review_strict), style = body, color = Tokens.warn)
+            Text(schedule.name, style = LockdownType.cardTitle, color = Tokens.text)
+            Text(stringResource(R.string.review_start, formatTime(schedule.startTime)), style = body, color = Tokens.text)
+            Text(stringResource(R.string.review_end, formatTime(schedule.endTime)), style = body, color = Tokens.text)
+            Text(schedule.repeat.label(), style = body, color = Tokens.text)
+        }
+    }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+/** Hour/minute steppers from the design; minutes move in 5-minute steps. */
 @Composable
-private fun TimePickerDialog(initial: LocalTime, onDismiss: () -> Unit, onConfirm: (LocalTime) -> Unit) {
-    val pickerState = rememberTimePickerState(initialHour = initial.hour, initialMinute = initial.minute)
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        text = { TimePicker(state = pickerState) },
-        confirmButton = {
-            TextButton(onClick = { onConfirm(LocalTime.of(pickerState.hour, pickerState.minute)) }) {
-                Text(stringResource(R.string.action_ok))
-            }
-        },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
-    )
+private fun StepperTimeDialog(title: String, initial: LocalTime, onDismiss: () -> Unit, onConfirm: (LocalTime) -> Unit) {
+    var time by rememberSaveable { mutableStateOf(initial) }
+    FlDialog(onDismiss = onDismiss, confirmLabel = stringResource(R.string.action_ok), onConfirm = { onConfirm(time) }) {
+        SectionLabel(title)
+        Row(
+            Modifier.fillMaxWidth().padding(top = 18.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            StepperColumn(
+                value = "%02d".format(Locale.ROOT, time.hour),
+                label = stringResource(R.string.editor_hours),
+                onUp = { time = time.plusHours(1) },
+                onDown = { time = time.minusHours(1) },
+            )
+            StepperColumn(
+                value = "%02d".format(Locale.ROOT, time.minute),
+                label = stringResource(R.string.editor_minutes),
+                onUp = { time = time.plusMinutes(MINUTE_STEP) },
+                onDown = { time = time.minusMinutes(MINUTE_STEP) },
+            )
+        }
+        MutedText(
+            formatTime(time),
+            Modifier.fillMaxWidth().padding(top = 14.dp),
+            LockdownType.bodySmall.copy(fontSize = 13.sp, textAlign = TextAlign.Center),
+        )
+    }
+}
+
+@Composable
+private fun StepperColumn(value: String, label: String, onUp: () -> Unit, onDown: () -> Unit) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        StepperButton(LucideIcons.ChevronUp, stringResource(R.string.editor_increase, label), onUp)
+        Text(
+            value,
+            style = LockdownType.bigNumber.copy(fontSize = 44.sp, fontFeatureSettings = "tnum"),
+            color = Tokens.text,
+            modifier = Modifier.semantics { contentDescription = "$label $value" },
+        )
+        StepperButton(LucideIcons.ChevronDown, stringResource(R.string.editor_decrease, label), onDown)
+    }
+}
+
+@Composable
+private fun StepperButton(icon: ImageVector, description: String, onClick: () -> Unit) {
+    Box(
+        Modifier
+            .size(width = 52.dp, height = 44.dp)
+            .border(1.dp, Tokens.line, RoundedCornerShape(5.dp))
+            .clickable(role = Role.Button, onClickLabel = description, onClick = onClick)
+            .semantics { contentDescription = description },
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(icon, contentDescription = null, tint = Tokens.text, modifier = Modifier.size(16.dp))
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -374,24 +467,30 @@ private fun OnceDatePickerDialog(initial: LocalDate, onDismiss: () -> Unit, onCo
     )
     DatePickerDialog(
         onDismissRequest = onDismiss,
+        colors = DatePickerDefaults.colors(containerColor = Tokens.surface),
         confirmButton = {
-            TextButton(
-                onClick = {
-                    val millis = pickerState.selectedDateMillis ?: return@TextButton onDismiss()
-                    onConfirm(Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate())
+            TextAction(
+                stringResource(R.string.action_ok).uppercase(),
+                {
+                    pickerState.selectedDateMillis
+                        ?.let { onConfirm(Instant.ofEpochMilli(it).atZone(ZoneOffset.UTC).toLocalDate()) }
+                        ?: onDismiss()
                 },
-            ) { Text(stringResource(R.string.action_ok)) }
+                color = Tokens.accent,
+                style = LockdownType.button,
+            )
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
+        dismissButton = { TextAction(stringResource(R.string.action_cancel), onDismiss) },
     ) {
-        DatePicker(state = pickerState)
+        DatePicker(state = pickerState, colors = DatePickerDefaults.colors(containerColor = Tokens.surface))
     }
 }
 
 private const val NAME_INPUT_LIMIT = 40
-private val TIME_BUTTON_MIN_WIDTH = Spacing.touchTarget * 2
+private const val MINUTE_STEP = 5L
 const val TAG_NAME = "editor_name"
 const val TAG_SAVE = "editor_save"
 const val TAG_STRICT = "editor_strict"
 const val TAG_ERROR = "editor_error"
 const val TAG_REVIEW = "editor_review"
+const val TAG_STARTS_NOW = "editor_starts_now"

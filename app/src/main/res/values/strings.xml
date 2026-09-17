@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Product name is isolated here so the app can be renamed without code changes. -->
-    <string name="app_name">FocusLock</string>
+    <string name="app_name">Lockdown App</string>
 
     <!-- Device admin -->
     <string name="admin_description">Enforces scheduled focus sessions using Android device management.</string>
-    <string name="admin_disable_warning">FocusLock will no longer be able to enforce focus sessions.</string>
+    <string name="admin_disable_warning">Lockdown App will no longer be able to enforce focus sessions.</string>
 
     <!-- Navigation -->
     <string name="nav_dashboard">Today</string>
@@ -32,7 +32,6 @@
     <string name="action_set_up_device">Set up this device</string>
     <string name="action_skip_setup">Not now</string>
     <string name="action_new_schedule">New session</string>
-    <string name="action_all_schedules">All schedules</string>
     <string name="action_create_session">Create session</string>
     <string name="action_save_session">Save session</string>
     <string name="action_start_session">Start session</string>
@@ -57,26 +56,20 @@
 
     <!-- Onboarding -->
     <string name="onboarding_step">Step %1$d of %2$d</string>
-    <string name="onboarding_welcome_title">Welcome to FocusLock</string>
+    <string name="onboarding_welcome_title">Welcome to Lockdown App</string>
     <string name="onboarding_welcome_body">Your phone is designed to capture your attention.\n\nThis app helps you reclaim it. Create scheduled periods where distractions are unavailable.</string>
     <string name="onboarding_strong_title">How strong lockdown works</string>
-    <string name="onboarding_strong_body">For the strongest enforcement, this device needs to be provisioned as a managed (Device Owner) device.\n\nThis is an official Android security feature, not an exploit. Without it, FocusLock uses screen pinning, which you can leave at any time.</string>
-    <string name="onboarding_learn_more">As Device Owner, FocusLock can keep the phone in lock task (kiosk) mode during a session: only the apps you allow can open, Home returns to the focus screen, the notification shade and recents are unavailable, and the app cannot be uninstalled or force-stopped until the session ends.\n\nDevice Owner can normally only be set on a freshly reset device (or a test device without accounts) using ADB, a QR code, or an enterprise enrollment service. The Device setup screen has exact instructions.</string>
+    <string name="onboarding_strong_body">For the strongest enforcement, this device needs to be provisioned as a managed (Device Owner) device.\n\nThis is an official Android security feature, not an exploit. Without it, Lockdown App uses screen pinning, which you can leave at any time.</string>
+    <string name="onboarding_learn_more">As Device Owner, Lockdown App can keep the phone in lock task (kiosk) mode during a session: only the apps you allow can open, Home returns to the focus screen, the notification shade and recents are unavailable, and the app cannot be uninstalled or force-stopped until the session ends.\n\nDevice Owner can normally only be set on a freshly reset device (or a test device without accounts) using ADB, a QR code, or an enterprise enrollment service. The Device setup screen has exact instructions.</string>
     <string name="onboarding_safety_title">Your safety comes first</string>
-    <string name="onboarding_safety_body">Once a session starts, you cannot voluntarily end it from the app.\n\nFocusLock never blocks emergency calls, the power menu, the secure lock screen, or Android\'s recovery and factory-reset mechanisms. These always remain available by design.</string>
+    <string name="onboarding_safety_body">Once a session starts, you cannot voluntarily end it from the app.\n\nLockdown App never blocks emergency calls, the power menu, the secure lock screen, or Android\'s recovery and factory-reset mechanisms. These always remain available by design.</string>
 
     <!-- Dashboard -->
-    <string name="dashboard_title">Today\'s focus</string>
-    <string name="dashboard_today">Progress</string>
     <string name="dashboard_next">Next lockdown</string>
     <string name="dashboard_no_upcoming">No upcoming sessions this week.</string>
     <string name="dashboard_no_schedules">You have no focus sessions yet.</string>
     <string name="dashboard_focus_now">Focus now</string>
-    <string name="dashboard_focus_now_body">Start a session immediately, without a schedule.</string>
-    <string name="dashboard_focus_now_action">Start a focus session</string>
     <string name="focus_now_warning">The session starts immediately. You will not be able to end it early.</string>
-    <string name="metric_focused_today">focused today</string>
-    <string name="metric_planned_today">planned today</string>
     <string name="metric_week">this week</string>
     <string name="metric_completed">completed</string>
     <string name="metric_exit_attempts">exit attempts</string>
@@ -87,7 +80,7 @@
     <string name="message_start_refused">This session can no longer be started.</string>
 
     <string name="mode_unprovisioned_title">Limited protection</string>
-    <string name="mode_unprovisioned_body">This device is not managed by FocusLock, so sessions use screen pinning, which can be exited.</string>
+    <string name="mode_unprovisioned_body">This device is not managed by Lockdown App, so sessions use screen pinning, which can be exited.</string>
     <string name="mode_normal_title">Ready</string>
     <string name="mode_normal_body">No sessions scheduled. Create one to protect your time.</string>
     <string name="mode_scheduled_title">Scheduled</string>
@@ -145,6 +138,7 @@
     <string name="error_overlap">Overlaps with “%1$s”. Change the time or disable that schedule.</string>
     <string name="review_title">Review session</string>
     <string name="review_body">This session will restrict access to everything except your allowed apps.\n\nOnce started, you will not be able to voluntarily end the session.</string>
+    <string name="review_starts_now">This time window is already open. Confirming locks the device right away, until %1$s.</string>
     <string name="review_strict">Strict mode applies the maximum restrictions this device supports.</string>
     <string name="review_start">Start: %1$s</string>
     <string name="review_end">End: %1$s</string>
@@ -194,14 +188,14 @@
     <string name="settings_daily_goal">Today\'s goal</string>
     <string name="settings_motivation">Message</string>
     <string name="settings_device">Device</string>
-    <string name="settings_about">About FocusLock</string>
-    <string name="settings_about_body">FocusLock works entirely offline. Schedules, history and enforcement never depend on an account, the internet or a server.</string>
+    <string name="settings_about">About Lockdown App</string>
+    <string name="settings_about_body">Lockdown App works entirely offline. Schedules, history and enforcement never depend on an account, the internet or a server.</string>
     <string name="settings_limitations">What Android does not allow</string>
-    <string name="settings_limitations_body">• Emergency calls, the power menu and the secure lock screen always stay available.\n• Recovery mode, safe mode on some devices, bootloader access and factory reset are outside any app\'s control. A factory reset removes FocusLock entirely.\n• Without Device Owner, sessions use screen pinning, which the user can exit.\n• Some manufacturers restrict background work; exact timing may require allowing exact alarms and disabling battery optimization.\n• A developer with ADB access to a debug build can always recover the device.</string>
+    <string name="settings_limitations_body">• Emergency calls, the power menu and the secure lock screen always stay available.\n• Recovery mode, safe mode on some devices, bootloader access and factory reset are outside any app\'s control. A factory reset removes Lockdown App entirely.\n• Without Device Owner, sessions use screen pinning, which the user can exit.\n• Some manufacturers restrict background work; exact timing may require allowing exact alarms and disabling battery optimization.\n• A developer with ADB access to a debug build can always recover the device.</string>
     <string name="settings_remove_owner">Remove device management</string>
     <string name="settings_remove_owner_body">Gives up Device Owner. Strong lockdown stops working until the device is provisioned again, which normally requires a factory reset.</string>
     <string name="settings_remove_owner_action">Remove Device Owner</string>
-    <string name="settings_remove_owner_confirm">FocusLock will no longer be able to enforce lockdown. Re-enabling it usually requires a factory reset. Continue?</string>
+    <string name="settings_remove_owner_confirm">Lockdown App will no longer be able to enforce lockdown. Re-enabling it usually requires a factory reset. Continue?</string>
     <string name="settings_owner_removed">Device Owner removed.</string>
     <string name="settings_owner_not_removed">Device Owner could not be removed.</string>
     <string name="developer_title">Developer tools</string>
@@ -213,13 +207,13 @@
     <string name="setup_limited">Status: Limited — see the items above</string>
     <string name="setup_restrictions">Restrictions applied during sessions</string>
     <string name="setup_how_title">How strong lockdown works</string>
-    <string name="setup_how_body">Android only lets a Device Owner app keep the phone in lock task (kiosk) mode, restrict Settings and prevent uninstalling. Device Owner is an official Android Enterprise feature. It must be set up deliberately; FocusLock never acquires it on its own.</string>
+    <string name="setup_how_body">Android only lets a Device Owner app keep the phone in lock task (kiosk) mode, restrict Settings and prevent uninstalling. Device Owner is an official Android Enterprise feature. It must be set up deliberately; Lockdown App never acquires it on its own.</string>
     <string name="setup_dev_title">Development / testing (ADB)</string>
     <string name="setup_dev_steps">1. Use a test device or emulator. Remove all accounts (Settings › Accounts) or factory reset it and skip account setup.\n2. Enable USB debugging and connect the device.\n3. Run:</string>
     <string name="setup_dev_verify">4. Verify the result:</string>
     <string name="setup_dev_notes">If the command fails with “already has accounts” or “already provisioned”, the device must be reset first. To undo, use Settings › Remove device management in this app, or factory reset the device.</string>
     <string name="setup_production_title">Production</string>
-    <string name="setup_production_body">For devices you distribute, provision FocusLock as Device Owner during setup using QR-code provisioning, NFC, or zero-touch / an EMM. Existing consumer phones with accounts cannot become managed without a factory reset.</string>
+    <string name="setup_production_body">For devices you distribute, provision Lockdown App as Device Owner during setup using QR-code provisioning, NFC, or zero-touch / an EMM. Existing consumer phones with accounts cannot become managed without a factory reset.</string>
     <string name="setup_safety_title">Always available</string>
     <string name="setup_safety_body">Emergency calls, the power menu, the secure lock screen, recovery mode and factory reset are never blocked.</string>
 
@@ -231,7 +225,7 @@
     <string name="cap_title_app_management">Application management</string>
     <string name="cap_title_time">Clock protection</string>
     <string name="cap_title_battery">Battery optimization</string>
-    <string name="cap_device_owner_ok">FocusLock manages this device.</string>
+    <string name="cap_device_owner_ok">Lockdown App manages this device.</string>
     <string name="cap_device_owner_admin_only">Device admin is active, but not Device Owner. Lockdown is limited.</string>
     <string name="cap_device_owner_missing">Not provisioned. Follow the steps below.</string>
     <string name="cap_lock_task_ok">Available. Only allowed apps can run during sessions.</string>
@@ -249,7 +243,7 @@
     <string name="cap_time_guard_only">Clock changes cannot be blocked; within a boot, moving the clock forward does not end a session early.</string>
     <string name="cap_battery_ok">Not restricted by battery optimization.</string>
     <string name="cap_battery_optimized">Optimized. Timing is protected by alarms, but unrestricted is more reliable.</string>
-    <string name="cap_manufacturer_note">%1$s devices may restrict background apps beyond standard Android. Allow FocusLock to run unrestricted in the battery settings.</string>
+    <string name="cap_manufacturer_note">%1$s devices may restrict background apps beyond standard Android. Allow Lockdown App to run unrestricted in the battery settings.</string>
 
     <!-- Notifications -->
     <string name="channel_reminders">Session reminders</string>
@@ -266,4 +260,52 @@
     <string name="notification_completed_title">Focus session completed</string>
     <string name="notification_completed_text">Duration: %1$s. Great work.</string>
     <string name="notification_completed_big">%1$s\nDuration: %2$s\n\nGreat work.</string>
+
+    <!-- Design refresh -->
+    <string name="greeting_morning">Good morning</string>
+    <string name="greeting_afternoon">Good afternoon</string>
+    <string name="greeting_evening">Good evening</string>
+    <string name="dashboard_focus_today">Focus today</string>
+    <string name="dashboard_quick_actions">Quick actions</string>
+    <string name="dashboard_active_line">%1$s · ends at %2$s</string>
+    <string name="dashboard_goal">Goal %1$s</string>
+    <string name="dashboard_to_go">%1$s to go</string>
+    <string name="dashboard_goal_reached">Goal reached</string>
+    <string name="dashboard_no_plan_today">No sessions planned today</string>
+    <string name="dashboard_starts_in">Starts in %1$s</string>
+    <string name="metric_focused">focused</string>
+    <string name="today_state_done">finished</string>
+    <string name="today_state_active">in progress</string>
+    <string name="today_state_upcoming">upcoming</string>
+    <string name="action_open_focus_screen">Open focus screen</string>
+    <string name="action_view_schedule">View schedule</string>
+    <string name="action_skip_session">Skip session</string>
+    <string name="action_new">New</string>
+    <string name="action_duplicate">Duplicate</string>
+    <string name="focus_now_placeholder">Deep work</string>
+    <string name="schedules_other_days">Other days</string>
+    <string name="schedule_copy_suffix">" (copy)"</string>
+    <string name="message_duplicated">Session duplicated. The copy is off until you enable it.</string>
+    <string name="message_deleted">Session deleted.</string>
+    <string name="message_command_copied">Command copied.</string>
+    <string name="editor_start_time">Start time</string>
+    <string name="editor_end_time">End time</string>
+    <string name="editor_hours">Hours</string>
+    <string name="editor_minutes">Minutes</string>
+    <string name="editor_increase">Increase %1$s</string>
+    <string name="editor_decrease">Decrease %1$s</string>
+    <string name="day_yesterday">Yesterday</string>
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_daily_goal_placeholder">5h 00m of deep work</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_light_sub">Bright and clean</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_dark_sub">Comfortable at night</string>
+    <string name="theme_system">System</string>
+    <string name="theme_system_sub">Follow device setting</string>
+    <string name="apps_allowed_during">Allowed during lockdown</string>
+    <string name="apps_blocked_during">Blocked during lockdown</string>
+    <string name="lockdown_remaining_of">%1$s remaining of %2$s</string>
+    <string name="lockdown_tagline">Your phone is unavailable for selected distractions.</string>
+    <string name="lockdown_focused">Focused</string>
 </resources>

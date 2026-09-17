@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.example.focuslock.domain.model.AppSettings
+import com.example.focuslock.domain.model.ThemeMode
 import com.example.focuslock.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -34,6 +35,7 @@ class DataStoreSettingsRepository @Inject constructor(
             prefs[REMINDER_MINUTES] = updated.reminderMinutes
             prefs[DAILY_GOAL] = updated.dailyGoal
             prefs[MOTIVATION] = updated.motivationalMessage
+            prefs[THEME_MODE] = updated.themeMode.name
         }
     }
 
@@ -47,6 +49,7 @@ class DataStoreSettingsRepository @Inject constructor(
         reminderMinutes = this[REMINDER_MINUTES] ?: AppSettings.DEFAULT_REMINDER_MINUTES,
         dailyGoal = this[DAILY_GOAL].orEmpty(),
         motivationalMessage = this[MOTIVATION] ?: AppSettings.DEFAULT_MOTIVATION,
+        themeMode = ThemeMode.entries.firstOrNull { it.name == this[THEME_MODE] } ?: ThemeMode.SYSTEM,
     ).sanitized()
 
     private fun AppSettings.sanitized() = copy(
@@ -64,5 +67,6 @@ class DataStoreSettingsRepository @Inject constructor(
         val REMINDER_MINUTES = intPreferencesKey("reminder_minutes")
         val DAILY_GOAL = stringPreferencesKey("daily_goal")
         val MOTIVATION = stringPreferencesKey("motivational_message")
+        val THEME_MODE = stringPreferencesKey("theme_mode")
     }
 }

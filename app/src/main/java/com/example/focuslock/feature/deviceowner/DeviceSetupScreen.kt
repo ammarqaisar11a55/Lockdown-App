@@ -9,23 +9,29 @@ import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -35,7 +41,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
@@ -44,11 +51,22 @@ import com.example.focuslock.R
 import com.example.focuslock.domain.model.Capability
 import com.example.focuslock.domain.model.CapabilityId
 import com.example.focuslock.domain.model.CapabilityStatus
-import com.example.focuslock.ui.components.FocusTopBar
-import com.example.focuslock.ui.components.SectionCard
+import com.example.focuslock.ui.components.BackHeader
+import com.example.focuslock.ui.components.FlCard
+import com.example.focuslock.ui.components.FlSnackbarHost
+import com.example.focuslock.ui.components.HairlineDivider
+import com.example.focuslock.ui.components.LucideIcons
+import com.example.focuslock.ui.components.MutedText
+import com.example.focuslock.ui.components.OutlineButton
+import com.example.focuslock.ui.components.SectionLabel
 import com.example.focuslock.ui.components.StatusDot
+import com.example.focuslock.ui.components.TextAction
 import com.example.focuslock.ui.components.statusLabel
+import com.example.focuslock.ui.theme.LockdownType
+import com.example.focuslock.ui.theme.Radii
 import com.example.focuslock.ui.theme.Spacing
+import com.example.focuslock.ui.theme.Tokens
+import kotlinx.coroutines.launch
 
 @Composable
 fun DeviceSetupRoute(onBack: () -> Unit, viewModel: DeviceSetupViewModel = hiltViewModel()) {
@@ -57,72 +75,117 @@ fun DeviceSetupRoute(onBack: () -> Unit, viewModel: DeviceSetupViewModel = hiltV
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
         viewModel.refresh()
     }
+    val snackbar = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val copiedText = stringResource(R.string.message_command_copied)
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { viewModel.refresh() }
 
-    Scaffold(topBar = { FocusTopBar(stringResource(R.string.setup_title), onBack) }) { padding ->
+    Scaffold(
+        containerColor = Tokens.bg,
+        // Insets are applied explicitly by the content (the app bar lives in the parent scaffold).
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        snackbarHost = { FlSnackbarHost(snackbar) }) { padding ->
         Column(
-            modifier = Modifier
+            Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = Spacing.md),
-            verticalArrangement = Arrangement.spacedBy(Spacing.md),
+                .statusBarsPadding()
+                .navigationBarsPadding(),
         ) {
-            state.capabilities?.let { capabilities ->
-                SectionCard(title = stringResource(R.string.setup_status)) {
-                    capabilities.capabilities.forEach { capability ->
-                        CapabilityRow(
-                            capability = capability,
-                            onFix = fixAction(capability, context) {
-                                permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                            },
-                        )
-                    }
-                    Text(
-                        stringResource(if (capabilities.isReady) R.string.setup_ready else R.string.setup_limited),
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.testTag(TAG_READINESS),
-                    )
-                    capabilities.manufacturerNote?.let {
-                        Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.tertiary)
-                    }
-                }
-                if (capabilities.supportedRestrictions.isNotEmpty()) {
-                    SectionCard(title = stringResource(R.string.setup_restrictions)) {
+            BackHeader(stringResource(R.string.setup_title), onBack)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(start = Spacing.screen, end = Spacing.screen, top = 10.dp, bottom = 30.dp),
+            ) {
+                state.capabilities?.let { capabilities ->
+                    SectionLabel(stringResource(R.string.setup_status))
+                    FlCard(Modifier.padding(top = 11.dp), contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 16.dp)) {
+                        capabilities.capabilities.forEach { capability ->
+                            CapabilityRow(
+                                capability = capability,
+                                onFix = fixAction(capability, context) {
+                                    permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                },
+                            )
+                            HairlineDivider()
+                        }
                         Text(
-                            capabilities.supportedRestrictions.joinToString("\n"),
-                            style = MaterialTheme.typography.bodySmall,
-                            fontFamily = FontFamily.Monospace,
+                            stringResource(if (capabilities.isReady) R.string.setup_ready else R.string.setup_limited),
+                            style = LockdownType.cardTitle.copy(fontSize = 15.5.sp),
+                            color = Tokens.text,
+                            modifier = Modifier.padding(top = 14.dp).testTag(TAG_READINESS),
                         )
+                        capabilities.manufacturerNote?.let {
+                            Text(it, style = LockdownType.caption, color = Tokens.warn, modifier = Modifier.padding(top = 8.dp))
+                        }
+                    }
+                    if (capabilities.supportedRestrictions.isNotEmpty()) {
+                        SectionLabel(stringResource(R.string.setup_restrictions), Modifier.padding(top = 22.dp))
+                        CodeBox(capabilities.supportedRestrictions.joinToString("\n"), color = Tokens.muted, modifier = Modifier.padding(top = 11.dp))
                     }
                 }
-            }
 
-            SectionCard(title = stringResource(R.string.setup_how_title)) {
-                Text(stringResource(R.string.setup_how_body), style = MaterialTheme.typography.bodyMedium)
-            }
+                Heading(stringResource(R.string.setup_how_title))
+                Paragraph(stringResource(R.string.setup_how_body))
 
-            SectionCard(title = stringResource(R.string.setup_dev_title)) {
-                Text(stringResource(R.string.setup_dev_steps), style = MaterialTheme.typography.bodyMedium)
-                CommandBlock(state.provisionCommand)
-                Text(stringResource(R.string.setup_dev_verify), style = MaterialTheme.typography.bodyMedium)
-                CommandBlock(state.verifyCommand)
-                Text(
-                    stringResource(R.string.setup_dev_notes),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+                Heading(stringResource(R.string.setup_dev_title))
+                Paragraph(stringResource(R.string.setup_dev_steps))
+                val clipboard = LocalClipboardManager.current
+                CodeBox(state.provisionCommand, modifier = Modifier.padding(top = 9.dp)) {
+                    OutlineButton(
+                        stringResource(R.string.action_copy),
+                        {
+                            clipboard.setText(AnnotatedString(state.provisionCommand))
+                            scope.launch { snackbar.showSnackbar(copiedText) }
+                        },
+                        Modifier.padding(top = 10.dp),
+                        minHeight = 38.dp,
+                        icon = LucideIcons.Copy,
+                        textStyle = LockdownType.button.copy(fontSize = 11.5.sp),
+                    )
+                }
+                Paragraph(stringResource(R.string.setup_dev_verify), Modifier.padding(top = 8.dp))
+                CodeBox(state.verifyCommand, modifier = Modifier.padding(top = 9.dp))
+                MutedText(stringResource(R.string.setup_dev_notes), Modifier.padding(top = 12.dp), LockdownType.caption.copy(lineHeight = 20.sp))
 
-            SectionCard(title = stringResource(R.string.setup_production_title)) {
-                Text(stringResource(R.string.setup_production_body), style = MaterialTheme.typography.bodyMedium)
-            }
+                Heading(stringResource(R.string.setup_production_title))
+                Paragraph(stringResource(R.string.setup_production_body))
 
-            SectionCard(title = stringResource(R.string.setup_safety_title)) {
-                Text(stringResource(R.string.setup_safety_body), style = MaterialTheme.typography.bodyMedium)
+                Heading(stringResource(R.string.setup_safety_title))
+                Paragraph(stringResource(R.string.setup_safety_body))
             }
-            Spacer(Modifier.height(Spacing.lg))
         }
+    }
+}
+
+@Composable
+private fun Heading(text: String) {
+    Text(text, style = LockdownType.cardTitle.copy(fontSize = 16.5.sp), color = Tokens.text, modifier = Modifier.padding(top = 22.dp))
+}
+
+@Composable
+private fun Paragraph(text: String, modifier: Modifier = Modifier) {
+    MutedText(text, modifier.padding(top = 6.dp), LockdownType.bodySmall.copy(lineHeight = 22.sp))
+}
+
+@Composable
+private fun CodeBox(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: androidx.compose.ui.graphics.Color = Tokens.accent,
+    footer: @Composable () -> Unit = {},
+) {
+    Column(
+        modifier
+            .fillMaxWidth()
+            .background(Tokens.surface2, RoundedCornerShape(Radii.control))
+            .border(1.dp, Tokens.lineSoft, RoundedCornerShape(Radii.control))
+            .padding(horizontal = 13.dp, vertical = 12.dp),
+    ) {
+        SelectionContainer { Text(text, style = LockdownType.mono, color = color) }
+        footer()
     }
 }
 
@@ -130,36 +193,29 @@ fun DeviceSetupRoute(onBack: () -> Unit, viewModel: DeviceSetupViewModel = hiltV
 private fun CapabilityRow(capability: Capability, onFix: (() -> Unit)?) {
     val title = capabilityTitle(capability.id)
     val status = statusLabel(capability.status)
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        StatusDot(capability.status)
+    Row(
+        Modifier.fillMaxWidth().padding(vertical = 13.dp),
+        verticalAlignment = Alignment.Top,
+        horizontalArrangement = Arrangement.spacedBy(11.dp),
+    ) {
+        StatusDot(capability.status, Modifier.padding(top = 5.dp))
         Column(
             Modifier
                 .weight(1f)
-                .padding(start = Spacing.sm)
                 .clearAndSetSemantics { contentDescription = "$title, $status. ${capability.detail}" },
         ) {
-            Text(title, style = MaterialTheme.typography.bodyLarge)
-            Text(capability.detail, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(title, style = LockdownType.body.copy(fontSize = 14.5.sp), color = Tokens.text)
+            MutedText(capability.detail, Modifier.padding(top = 2.dp), LockdownType.caption)
         }
         if (onFix != null && capability.status != CapabilityStatus.OK) {
-            TextButton(onClick = onFix) { Text(stringResource(R.string.action_fix)) }
+            TextAction(
+                stringResource(R.string.action_fix).uppercase(),
+                onFix,
+                color = Tokens.accent,
+                style = LockdownType.button.copy(fontSize = 12.sp),
+                minHeight = 36.dp,
+            )
         }
-    }
-}
-
-@Composable
-private fun CommandBlock(command: String) {
-    val clipboard = LocalClipboardManager.current
-    SelectionContainer {
-        Text(
-            command,
-            style = MaterialTheme.typography.bodySmall,
-            fontFamily = FontFamily.Monospace,
-            color = MaterialTheme.colorScheme.primary,
-        )
-    }
-    OutlinedButton(onClick = { clipboard.setText(AnnotatedString(command)) }) {
-        Text(stringResource(R.string.action_copy))
     }
 }
 

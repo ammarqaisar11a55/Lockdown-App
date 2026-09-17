@@ -40,11 +40,9 @@ class DeviceCapabilityChecker @Inject constructor(
             automaticTime(owner),
             battery(),
         )
-        val supported = if (owner) {
+        // Shown whether or not the device is managed, so users know what a session would enforce.
+        val supported = listOf(LOCK_TASK_LABEL) +
             RestrictionPolicy.userRestrictions(strictMode = true, allowDebugging = allowDebugging).sorted()
-        } else {
-            emptyList()
-        }
         return DeviceCapabilities(capabilities, supported, manufacturerNote())
     }
 
@@ -124,6 +122,8 @@ class DeviceCapabilityChecker @Inject constructor(
         Capability(id, status, context.getString(detail))
 
     private companion object {
+        const val LOCK_TASK_LABEL = "lock_task_mode"
+
         /** Vendors publicly documented (dontkillmyapp.com) to restrict background work beyond AOSP. */
         val AGGRESSIVE_BACKGROUND_MANUFACTURERS = listOf("xiaomi", "huawei", "honor", "oppo", "vivo", "realme", "oneplus", "meizu", "asus")
     }

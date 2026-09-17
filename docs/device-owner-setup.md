@@ -1,6 +1,6 @@
 # Device Owner Setup
 
-FocusLock never acquires Device Owner on its own. It must be provisioned deliberately.
+Lockdown App never acquires Device Owner on its own. It must be provisioned deliberately.
 
 ## Component names
 
@@ -43,7 +43,7 @@ Steps:
    adb shell dpm list-owners
    ```
 
-4. Open FocusLock › Settings › Device setup. *Device Owner* and *Lock task* should read Ready.
+4. Open Lockdown App › Settings › Device setup. *Device Owner* and *Lock task* should read Ready.
 
 Common errors:
 
@@ -63,7 +63,7 @@ In order of preference:
 
 1. **In the app:** Settings › *Remove device management* (only when no session is active). This
    calls `DevicePolicyManager.clearDeviceOwnerApp()`; the system also drops all restrictions set
-   by FocusLock.
+   by Lockdown App.
 2. **ADB:** `adb shell dpm remove-active-admin <component>` — works only for apps installed with
    `android:testOnly="true"` (for example when run from Android Studio).
 3. **Factory reset** (always works; emulator: *Wipe data*).
@@ -77,10 +77,10 @@ USB debugging automatically when that restriction is lifted.
 ## Limitations on existing consumer devices
 
 - A phone that already has a Google (or other) account cannot become Device Owner without a
-  factory reset. This is an Android security guarantee, not a FocusLock limitation.
-- Profile Owner (work profile) mode does not provide device-wide lock task, so FocusLock does not
+  factory reset. This is an Android security guarantee, not a Lockdown App limitation.
+- Profile Owner (work profile) mode does not provide device-wide lock task, so Lockdown App does not
   support it.
-- Without Device Owner, FocusLock still works in **screen pinning** mode, which the user can exit.
+- Without Device Owner, Lockdown App still works in **screen pinning** mode, which the user can exit.
 
 ## Production deployment
 
@@ -92,7 +92,7 @@ USB debugging automatically when that restriction is lifted.
     certificate, URL-safe Base64);
   - NFC provisioning;
   - Zero-touch enrollment or an EMM that supports custom DPCs.
-- FocusLock implements the Android 10+ provisioning handshake:
+- Lockdown App implements the Android 10+ provisioning handshake:
   `GET_PROVISIONING_MODE` returns *fully managed device*, and `ADMIN_POLICY_COMPLIANCE` completes
   immediately. Both activities require `BIND_DEVICE_ADMIN`, so only the system can start them.
 - Rename the product identity before shipping (see README › Production Deployment) and sign with

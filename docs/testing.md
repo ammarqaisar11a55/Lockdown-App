@@ -77,7 +77,7 @@ Developer tools). Follow logs with `adb logcat -s LOCKDOWN_ENGINE LOCKDOWN_UI DE
 |---|---|---|---|
 | 1 | Start lockdown normally | *Create schedule starting in ~2 min*, press Home, wait | Countdown notification, then the lockdown screen at the start minute; `mLockTaskModeState=LOCKED` |
 | 2 | Kill the process | During a session: `adb shell am kill com.example.focuslock.debug` (or `am force-stop`) | Session remains; screen restored |
-| 3 | Reopen the app | Launch FocusLock from adb | Redirected to the lockdown screen |
+| 3 | Reopen the app | Launch Lockdown App from adb | Redirected to the lockdown screen |
 | 4 | Reboot | `adb reboot` during a session | Lockdown screen after boot; the session ends on time |
 | 5 | Change timezone | `adb shell cmd alarm set-timezone Asia/Tokyo` | Running session unchanged; upcoming sessions shown at local wall-clock time |
 | 6 | Disable Internet | Airplane mode | No difference |

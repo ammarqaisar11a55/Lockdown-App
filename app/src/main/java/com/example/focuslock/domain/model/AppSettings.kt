@@ -8,6 +8,7 @@ data class AppSettings(
     val reminderMinutes: Int = DEFAULT_REMINDER_MINUTES,
     val dailyGoal: String = "",
     val motivationalMessage: String = DEFAULT_MOTIVATION,
+    val themeMode: ThemeMode = ThemeMode.SYSTEM,
 ) {
     companion object {
         const val DEFAULT_COUNTDOWN_MINUTES = 5

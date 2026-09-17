@@ -27,6 +27,12 @@ object DurationFormatter {
         )
     }
 
+    /** "05:00" for countdowns under an hour. */
+    fun minutesSeconds(duration: Duration): String {
+        val safe = if (duration.isNegative) Duration.ZERO else duration
+        return String.format(Locale.ROOT, "%02d:%02d", safe.toMinutes(), safe.secondsPart())
+    }
+
     /** "4h 12m", "45m", "0m" */
     fun short(duration: Duration): String {
         val totalMinutes = (if (duration.isNegative) Duration.ZERO else duration).toMinutes()

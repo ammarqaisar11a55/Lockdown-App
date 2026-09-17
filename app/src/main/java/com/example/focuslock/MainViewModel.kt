@@ -3,6 +3,7 @@ package com.example.focuslock
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.focuslock.domain.model.ReconcileTrigger
+import com.example.focuslock.domain.model.ThemeMode
 import com.example.focuslock.domain.repository.LockdownCoordinator
 import com.example.focuslock.domain.repository.LockdownStateRepository
 import com.example.focuslock.domain.repository.SettingsRepository
@@ -30,6 +31,11 @@ class MainViewModel @Inject constructor(
         val onboarded = settingsRepository.settings.first().onboardingCompleted
         emit(if (onboarded) Routes.DASHBOARD else Routes.ONBOARDING)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    val themeMode: StateFlow<ThemeMode> = settingsRepository.settings
+        .map { it.themeMode }
+        .distinctUntilChanged()
+        .stateIn(viewModelScope, SharingStarted.Eagerly, ThemeMode.SYSTEM)
 
     val lockdownActive = stateRepository.observeState()
         .map { it.isLocked }

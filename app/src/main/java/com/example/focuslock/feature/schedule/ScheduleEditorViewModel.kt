@@ -3,6 +3,7 @@ package com.example.focuslock.feature.schedule
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.focuslock.core.scheduling.ScheduleCalculator
 import com.example.focuslock.core.scheduling.ScheduleValidationError
 import com.example.focuslock.core.scheduling.ScheduleValidator
 import com.example.focuslock.core.time.TimeSource
@@ -80,6 +81,7 @@ private data class EditorState(
     val error: ScheduleValidationError? = null,
     val lockedBySession: Boolean = false,
     val review: FocusSchedule? = null,
+    val reviewStartsNow: Boolean = false,
     val saving: Boolean = false,
     val finished: Boolean = false,
 )
@@ -92,6 +94,8 @@ data class ScheduleEditorUiState(
     val error: ScheduleValidationError? = null,
     val lockedBySession: Boolean = false,
     val review: FocusSchedule? = null,
+    /** True when saving would lock the device immediately (the window is already open). */
+    val reviewStartsNow: Boolean = false,
     val saving: Boolean = false,
     val finished: Boolean = false,
 )
@@ -121,6 +125,7 @@ class ScheduleEditorViewModel @Inject constructor(
             error = s.error,
             lockedBySession = s.lockedBySession,
             review = s.review,
+            reviewStartsNow = s.reviewStartsNow,
             saving = s.saving,
             finished = s.finished,
         )
@@ -152,21 +157,22 @@ class ScheduleEditorViewModel @Inject constructor(
         viewModelScope.launch {
             val current = state.value
             val candidate = buildSchedule(current)
-            val error = ScheduleValidator.validate(
-                candidate,
-                scheduleRepository.getSchedules(),
-                timeSource.now(),
-                timeSource.zone(),
-            )
-            state.update { if (error != null) it.copy(error = error) else it.copy(review = candidate) }
+            val now = timeSource.now()
+            val zone = timeSource.zone()
+            val error = ScheduleValidator.validate(candidate, scheduleRepository.getSchedules(), now, zone)
+            val startsNow = candidate.enabled && candidate.autoStart &&
+                ScheduleCalculator.activeWindows(listOf(candidate), now, zone).isNotEmpty()
+            state.update {
+                if (error != null) it.copy(error = error) else it.copy(review = candidate, reviewStartsNow = startsNow)
+            }
         }
     }
 
-    fun dismissReview() = state.update { it.copy(review = null) }
+    fun dismissReview() = state.update { it.copy(review = null, reviewStartsNow = false) }
 
     fun confirmSave() {
         val candidate = state.value.review ?: return
-        state.update { it.copy(saving = true, review = null) }
+        state.update { it.copy(saving = true, review = null, reviewStartsNow = false) }
         viewModelScope.launch {
             val result = saveSchedule(candidate)
             state.update { applyResult(it.copy(saving = false), result) }

@@ -6,6 +6,7 @@ import com.example.focuslock.core.common.IoDispatcher
 import com.example.focuslock.core.device.DevicePolicyController
 import com.example.focuslock.domain.model.AppSettings
 import com.example.focuslock.domain.model.ReconcileTrigger
+import com.example.focuslock.domain.model.ThemeMode
 import com.example.focuslock.domain.repository.LockdownCoordinator
 import com.example.focuslock.domain.repository.LockdownStateRepository
 import com.example.focuslock.domain.repository.SettingsRepository
@@ -60,6 +61,10 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun setCountdownMinutes(minutes: Int) = updateAndReconcile { it.copy(countdownMinutes = minutes) }
+
+    fun setThemeMode(mode: ThemeMode) {
+        viewModelScope.launch { settingsRepository.update { it.copy(themeMode = mode) } }
+    }
 
     fun setReminderMinutes(minutes: Int) = updateAndReconcile { it.copy(reminderMinutes = minutes) }
 

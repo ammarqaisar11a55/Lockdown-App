@@ -11,6 +11,7 @@ import com.example.focuslock.core.scheduling.ScheduleCalculator
 import com.example.focuslock.core.security.DecisionInput
 import com.example.focuslock.core.security.LockdownDecider
 import com.example.focuslock.core.security.LockdownTarget
+import com.example.focuslock.core.time.DurationFormatter
 import com.example.focuslock.core.time.TimeSource
 import com.example.focuslock.domain.model.AppMode
 import com.example.focuslock.domain.model.FocusSchedule
@@ -47,17 +48,29 @@ import javax.inject.Inject
 
 data class CountdownInfo(val item: SessionItem, val remaining: Duration)
 
+data class ActiveInfo(val name: String, val endTime: String, val remaining: Duration)
+
+enum class DayPart { MORNING, AFTERNOON, EVENING }
+
+enum class TodayItemState { DONE, ACTIVE, UPCOMING }
+
+data class TodayItem(val key: String, val name: String, val duration: Duration, val state: TodayItemState)
+
 enum class DashboardMessage { FOCUS_STARTED, FOCUS_REFUSED, SKIPPED, SKIP_REFUSED, START_REFUSED }
 
 data class DashboardUiState(
     val loading: Boolean = true,
     val mode: AppMode = AppMode.NORMAL,
     val isDeviceOwner: Boolean = false,
+    val dayPart: DayPart = DayPart.MORNING,
+    val dateText: String = "",
     val stats: FocusStats = FocusStats.EMPTY,
     val countdown: CountdownInfo? = null,
+    val active: ActiveInfo? = null,
     val awaitingStart: SessionItem? = null,
     val next: SessionItem? = null,
-    val tomorrow: List<SessionItem> = emptyList(),
+    val nextStartsIn: Duration? = null,
+    val today: List<TodayItem> = emptyList(),
     val hasSchedules: Boolean = false,
 )
 
@@ -97,9 +110,9 @@ class DashboardViewModel @Inject constructor(
         DashboardSources(schedules, state, week, recent.firstOrNull(), settings.countdownMinutes, settings.reminderMinutes)
     }
 
-    // Tick every second only while a countdown is visible; otherwise once a minute.
+    // Tick every second only while a countdown or session is visible; otherwise once a minute.
     private val ticker = stateRepository.observeState()
-        .map { it.phase == LockdownPhase.COUNTDOWN }
+        .map { it.phase != LockdownPhase.IDLE }
         .distinctUntilChanged()
         .flatMapLatest { counting -> wallClockTicker(if (counting) TICK_SECOND_MS else TICK_MINUTE_MS) }
 
@@ -149,21 +162,54 @@ class DashboardViewModel @Inject constructor(
             reminderMinutes = src.reminderMinutes,
         )
         val target = LockdownDecider.decide(input)
-        val upcoming = ScheduleCalculator.upcomingWindows(src.schedules, now, zone, days = UPCOMING_DAYS)
+        val upcomingWindows = ScheduleCalculator.upcomingWindows(src.schedules, now, zone, days = UPCOMING_DAYS)
             .filterNot { it.occurrenceKey in src.state.skippedOccurrences }
-            .map { it.toSessionItem(zone) }
+        val upcoming = upcomingWindows.map { it.toSessionItem(zone) }
         val countdown = (target as? LockdownTarget.Countdown)?.let {
             CountdownInfo(it.window.toSessionItem(zone), Duration.between(now, it.window.start).coerceAtLeast(Duration.ZERO))
+        }
+        val session = src.state.session
+        val active = if (src.state.isLocked && session != null) {
+            ActiveInfo(
+                name = session.name,
+                endTime = DurationFormatter.time(session.end, zone),
+                remaining = LockdownDecider.remaining(input, session),
+            )
+        } else {
+            null
+        }
+        val nextWindow = upcomingWindows.firstOrNull { it.occurrenceKey != countdown?.item?.occurrenceKey }
+        val localNow = now.atZone(zone)
+        val today = localNow.toLocalDate()
+        val todayItems = ScheduleCalculator.windowsOnDate(src.schedules, today, zone).map { window ->
+            TodayItem(
+                key = window.occurrenceKey,
+                name = window.name,
+                duration = window.duration,
+                state = when {
+                    !now.isBefore(window.end) -> TodayItemState.DONE
+                    now in window -> TodayItemState.ACTIVE
+                    else -> TodayItemState.UPCOMING
+                },
+            )
         }
         return DashboardUiState(
             loading = false,
             mode = AppModeResolver.resolve(owner, src.state, upcoming.isNotEmpty(), src.lastSession, now),
             isDeviceOwner = owner,
+            dayPart = when (localNow.hour) {
+                in 0 until NOON -> DayPart.MORNING
+                in NOON until EVENING -> DayPart.AFTERNOON
+                else -> DayPart.EVENING
+            },
+            dateText = DurationFormatter.date(now, zone),
             stats = FocusStatsCalculator.compute(src.weekHistory, src.schedules, now, zone),
             countdown = countdown,
+            active = active,
             awaitingStart = (target as? LockdownTarget.AwaitingStart)?.window?.toSessionItem(zone),
-            next = upcoming.firstOrNull { it.occurrenceKey != countdown?.item?.occurrenceKey },
-            tomorrow = upcoming.filter { it.daysFromToday == 1L },
+            next = nextWindow?.toSessionItem(zone),
+            nextStartsIn = nextWindow?.let { Duration.between(now, it.start) },
+            today = todayItems,
             hasSchedules = src.schedules.isNotEmpty(),
         )
     }
@@ -171,5 +217,7 @@ class DashboardViewModel @Inject constructor(
     private companion object {
         const val STOP_TIMEOUT_MS = 5_000L
         const val UPCOMING_DAYS = 7L
+        const val NOON = 12
+        const val EVENING = 18
     }
 }

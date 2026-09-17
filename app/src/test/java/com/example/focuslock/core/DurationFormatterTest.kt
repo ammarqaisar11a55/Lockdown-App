@@ -14,6 +14,13 @@ class DurationFormatterTest {
     }
 
     @Test
+    fun `minutes and seconds format`() {
+        assertEquals("05:00", DurationFormatter.minutesSeconds(Duration.ofMinutes(5)))
+        assertEquals("59:59", DurationFormatter.minutesSeconds(Duration.ofSeconds(3599)))
+        assertEquals("00:00", DurationFormatter.minutesSeconds(Duration.ofSeconds(-1)))
+    }
+
+    @Test
     fun `short format`() {
         assertEquals("4h 12m", DurationFormatter.short(Duration.ofMinutes(252)))
         assertEquals("45m", DurationFormatter.short(Duration.ofMinutes(45)))

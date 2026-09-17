@@ -28,6 +28,7 @@ class LockdownScreenTest {
     private val display = LockdownDisplay(
         sessionName = "University Study",
         remaining = Duration.ofHours(2).plusMinutes(47).plusSeconds(18),
+        total = Duration.ofHours(5),
         endTime = "5:00 PM",
         currentTime = "2:12 PM",
         dailyGoal = "Finish chapter 4",
@@ -48,6 +49,8 @@ class LockdownScreenTest {
         rule.onNodeWithText("University Study").assertIsDisplayed()
         rule.onNodeWithText("Ends at 5:00 PM").assertIsDisplayed()
         rule.onNodeWithText("Battery 82%").assertIsDisplayed()
+        rule.onNodeWithText("LOCKDOWN APP").assertIsDisplayed()
+        rule.onNodeWithText("STRICT MODE").assertIsDisplayed()
         rule.onNodeWithText("2:12 PM").assertIsDisplayed()
         rule.onNodeWithText("Finish chapter 4").performScrollTo().assertIsDisplayed()
         rule.onNodeWithText("Emergency calls", substring = true).performScrollTo().assertIsDisplayed()
