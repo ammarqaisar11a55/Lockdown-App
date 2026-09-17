@@ -17,6 +17,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -68,7 +69,7 @@ private fun HistoryCard(entry: HistoryEntry) {
             add(status)
             if (entry.strictMode) add(stringResource(R.string.label_strict))
             if (entry.recoveries > 0) add(stringResource(R.string.history_recovered, entry.recoveries))
-            if (entry.exitAttempts > 0) add(stringResource(R.string.history_exit_attempts, entry.exitAttempts))
+            if (entry.exitAttempts > 0) add(pluralStringResource(R.plurals.history_exit_attempts, entry.exitAttempts, entry.exitAttempts))
         }
         Text(
             details.joinToString(" · "),

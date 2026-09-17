@@ -73,6 +73,8 @@ android {
         warningsAsErrors = false
         abortOnError = true
         checkReleaseBuilds = true
+        // Dependency versions are pinned deliberately and upgraded as a separate, tested change.
+        disable += setOf("GradleDependency", "AndroidGradlePluginVersion", "NewerVersionAvailable")
     }
     testOptions {
         unitTests.isReturnDefaultValues = true

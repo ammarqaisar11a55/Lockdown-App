@@ -11,6 +11,10 @@ object DurationFormatter {
     private const val SECONDS_PER_MINUTE = 60L
     private const val MINUTES_PER_HOUR = 60L
 
+    // Duration.toMinutesPart()/toSecondsPart() need API 31; minSdk is 28, so compute manually.
+    private fun Duration.minutesPart(): Long = toMinutes() % MINUTES_PER_HOUR
+    private fun Duration.secondsPart(): Long = seconds % SECONDS_PER_MINUTE
+
     /** "02:47:18" */
     fun clock(duration: Duration): String {
         val safe = if (duration.isNegative) Duration.ZERO else duration
@@ -18,8 +22,8 @@ object DurationFormatter {
             Locale.ROOT,
             "%02d:%02d:%02d",
             safe.toHours(),
-            safe.toMinutesPart(),
-            safe.toSecondsPart(),
+            safe.minutesPart(),
+            safe.secondsPart(),
         )
     }
 
@@ -35,10 +39,10 @@ object DurationFormatter {
     fun spoken(duration: Duration): String {
         val safe = if (duration.isNegative) Duration.ZERO else duration
         val hours = safe.toHours()
-        val minutes = safe.toMinutesPart()
+        val minutes = safe.minutesPart()
         val parts = buildList {
             if (hours > 0) add(if (hours == 1L) "1 hour" else "$hours hours")
-            if (minutes > 0 || hours == 0L) add(if (minutes == 1) "1 minute" else "$minutes minutes")
+            if (minutes > 0 || hours == 0L) add(if (minutes == 1L) "1 minute" else "$minutes minutes")
         }
         val seconds = safe.seconds
         return if (seconds < SECONDS_PER_MINUTE) "less than a minute" else parts.joinToString(" ")

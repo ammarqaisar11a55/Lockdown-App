@@ -52,9 +52,12 @@ object LockdownDecider {
             return LockdownTarget.Active(current, continuing = true)
         }
 
+        // Only an ACTIVE session that has just expired must not be restarted; a COUNTDOWN session
+        // is the very occurrence that should start now.
+        val expiredKey = current?.occurrenceKey?.takeIf { state.phase == LockdownPhase.ACTIVE }
         val activeCandidates = ScheduleCalculator.activeWindows(input.schedules, input.now, input.zone)
             .filterNot { it.occurrenceKey in state.skippedOccurrences }
-            .filterNot { current != null && it.occurrenceKey == current.occurrenceKey }
+            .filterNot { it.occurrenceKey == expiredKey }
 
         activeCandidates
             .filter { it.autoStart || it.occurrenceKey in state.startedOccurrences }

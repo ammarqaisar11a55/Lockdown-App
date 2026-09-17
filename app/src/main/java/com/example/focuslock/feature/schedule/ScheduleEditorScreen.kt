@@ -47,6 +47,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -171,7 +172,7 @@ fun ScheduleEditorScreen(
                     Column(Modifier.weight(1f)) {
                         Text(stringResource(R.string.editor_allowed_apps), style = MaterialTheme.typography.bodyLarge)
                         Text(
-                            stringResource(R.string.editor_allowed_apps_count, state.allowedAppCount),
+                            pluralStringResource(R.plurals.editor_allowed_apps_count, state.allowedAppCount, state.allowedAppCount),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )

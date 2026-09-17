@@ -128,7 +128,10 @@
     <string name="editor_overnight">Ends the next day.</string>
     <string name="editor_repeat">Repeat</string>
     <string name="editor_allowed_apps">Allowed apps</string>
-    <string name="editor_allowed_apps_count">%d apps allowed, plus essential functions</string>
+    <plurals name="editor_allowed_apps_count">
+        <item quantity="one">%d app allowed, plus essential functions</item>
+        <item quantity="other">%d apps allowed, plus essential functions</item>
+    </plurals>
     <string name="editor_strict">Strict mode</string>
     <string name="editor_strict_subtitle">Maximum supported restrictions</string>
     <string name="editor_auto_start">Start automatically</string>
@@ -177,7 +180,10 @@
     <string name="history_interrupted">Interrupted</string>
     <string name="history_in_progress">In progress</string>
     <string name="history_recovered">Recovered %1$d×</string>
-    <string name="history_exit_attempts">%1$d exit attempts</string>
+    <plurals name="history_exit_attempts">
+        <item quantity="one">%1$d exit attempt</item>
+        <item quantity="other">%1$d exit attempts</item>
+    </plurals>
 
     <!-- Settings -->
     <string name="settings_title">Settings</string>
