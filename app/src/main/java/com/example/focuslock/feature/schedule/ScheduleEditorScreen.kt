@@ -49,6 +49,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.focuslock.R
 import com.example.focuslock.domain.model.FocusSchedule
@@ -85,14 +87,17 @@ import java.util.Locale
 fun ScheduleEditorRoute(
     onBack: () -> Unit,
     onConfigureApps: () -> Unit,
+    onOpenDeviceSetup: () -> Unit,
     viewModel: ScheduleEditorViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     LaunchedEffect(state.finished) { if (state.finished) onBack() }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { viewModel.refreshDeviceOwner() }
     ScheduleEditorScreen(
         state = state,
         onBack = onBack,
         onConfigureApps = onConfigureApps,
+        onOpenDeviceSetup = onOpenDeviceSetup,
         onFormChange = viewModel::updateForm,
         onToggleDay = viewModel::toggleDay,
         onSave = viewModel::requestSave,
@@ -115,11 +120,13 @@ fun ScheduleEditorScreen(
     onConfirmSave: () -> Unit,
     onDismissReview: () -> Unit,
     onDelete: () -> Unit,
+    onOpenDeviceSetup: () -> Unit = {},
 ) {
     var timePicker by rememberSaveable { mutableStateOf<PickerTarget?>(null) }
     var showDatePicker by rememberSaveable { mutableStateOf(false) }
     var showStrictConfirm by rememberSaveable { mutableStateOf(false) }
     var showDeleteConfirm by rememberSaveable { mutableStateOf(false) }
+    var showStrictUnavailable by rememberSaveable { mutableStateOf(false) }
     val form = state.form
 
     Column(
@@ -196,10 +203,16 @@ fun ScheduleEditorScreen(
                 HairlineDivider()
                 SwitchRow(
                     title = stringResource(R.string.editor_strict),
-                    subtitle = stringResource(R.string.editor_strict_subtitle),
+                    subtitle = stringResource(
+                        if (state.strictAvailable) R.string.editor_strict_subtitle else R.string.editor_strict_needs_owner,
+                    ),
                     checked = form.strictMode,
                     onCheckedChange = { enable ->
-                        if (enable) showStrictConfirm = true else onFormChange { it.copy(strictMode = false) }
+                        when {
+                            !enable -> onFormChange { it.copy(strictMode = false) }
+                            state.strictAvailable -> showStrictConfirm = true
+                            else -> showStrictUnavailable = true
+                        }
                     },
                     modifier = Modifier.testTag(TAG_STRICT),
                 )
@@ -260,6 +273,18 @@ fun ScheduleEditorScreen(
                 onFormChange { it.copy(strictMode = true) }
             },
             onDismiss = { showStrictConfirm = false },
+        )
+    }
+    if (showStrictUnavailable) {
+        ConfirmDialog(
+            title = stringResource(R.string.strict_unavailable_title),
+            message = stringResource(R.string.strict_unavailable_body),
+            confirmLabel = stringResource(R.string.action_open_device_setup),
+            onConfirm = {
+                showStrictUnavailable = false
+                onOpenDeviceSetup()
+            },
+            onDismiss = { showStrictUnavailable = false },
         )
     }
     if (showDeleteConfirm) {

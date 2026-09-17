@@ -134,6 +134,7 @@ fun FocusNavHost(
                 ScheduleEditorRoute(
                     onBack = navController::popBackStack,
                     onConfigureApps = { navController.navigate(Routes.APPLICATIONS) },
+                    onOpenDeviceSetup = { navController.navigate(Routes.DEVICE_SETUP) },
                 )
             }
             composable(Routes.APPLICATIONS) { ApplicationsRoute(onBack = navController::popBackStack) }

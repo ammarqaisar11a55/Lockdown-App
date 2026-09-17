@@ -39,7 +39,7 @@ class DeviceCapabilityChecker @Inject constructor(
             applicationManagement(owner),
             automaticTime(owner),
             battery(),
-        )
+        ) + listOfNotNull(pinningLock(owner))
         // Shown whether or not the device is managed, so users know what a session would enforce.
         val supported = listOf(LOCK_TASK_LABEL) +
             RestrictionPolicy.userRestrictions(strictMode = true, allowDebugging = allowDebugging).sorted()
@@ -107,6 +107,13 @@ class DeviceCapabilityChecker @Inject constructor(
         } else {
             capability(CapabilityId.BATTERY, CapabilityStatus.WARNING, R.string.cap_battery_optimized)
         }
+    }
+
+    /** The app cannot read or change this system option; it can only point the user to it. */
+    private fun pinningLock(owner: Boolean): Capability? = if (owner) {
+        null
+    } else {
+        capability(CapabilityId.PINNING_LOCK, CapabilityStatus.WARNING, R.string.cap_pinning_lock)
     }
 
     private fun manufacturerNote(): String? {

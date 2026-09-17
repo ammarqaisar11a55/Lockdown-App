@@ -118,6 +118,15 @@ class ScheduleEditorScreenTest {
     }
 
     @Test
+    fun strictModeIsNotOfferedWithoutDeviceOwner() {
+        val state = setContent(ScheduleEditorUiState(loading = false, strictAvailable = false))
+        rule.onNodeWithText("Requires Device Owner setup on this phone").performScrollTo().assertIsDisplayed()
+        rule.onNodeWithTag(TAG_STRICT).performScrollTo().performClick()
+        rule.onNodeWithText("Strict mode needs device setup").assertIsDisplayed()
+        assertEquals(false, state().form.strictMode)
+    }
+
+    @Test
     fun repeatOptionsAndCustomDays() {
         val state = setContent()
         rule.onNodeWithText("Every day").performScrollTo().performClick()

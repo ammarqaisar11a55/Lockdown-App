@@ -230,6 +230,7 @@ private fun capabilityTitle(id: CapabilityId): String = stringResource(
         CapabilityId.APPLICATION_MANAGEMENT -> R.string.cap_title_app_management
         CapabilityId.AUTOMATIC_TIME -> R.string.cap_title_time
         CapabilityId.BATTERY -> R.string.cap_title_battery
+        CapabilityId.PINNING_LOCK -> R.string.cap_title_pinning_lock
     },
 )
 
@@ -257,6 +258,7 @@ private fun fixAction(capability: Capability, context: Context, requestNotificat
             }
         }
         CapabilityId.BATTERY -> { { context.openSettings(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)) } }
+        CapabilityId.PINNING_LOCK -> { { context.openSettings(Intent(Settings.ACTION_SECURITY_SETTINGS)) } }
         else -> null
     }
 

@@ -26,15 +26,28 @@ import com.example.focuslock.domain.repository.LockdownStateRepository
 import com.example.focuslock.domain.repository.ScheduleRepository
 import com.example.focuslock.domain.repository.SettingsRepository
 import com.example.focuslock.feature.lockdown.ActivityLockdownLauncher
+import com.example.focuslock.core.common.IoDispatcher
+import com.example.focuslock.domain.usecase.DeviceOwnerStatus
 import dagger.Binds
+import dagger.Provides
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class BindingsModule {
+    companion object {
+        @Provides
+        fun provideDeviceOwnerStatus(
+            controller: DevicePolicyController,
+            @IoDispatcher ioDispatcher: CoroutineDispatcher,
+        ): DeviceOwnerStatus = DeviceOwnerStatus { withContext(ioDispatcher) { controller.isDeviceOwner() } }
+    }
+
     @Binds abstract fun bindLogger(impl: AndroidFocusLogger): FocusLogger
     @Binds abstract fun bindTimeSource(impl: SystemTimeSource): TimeSource
 

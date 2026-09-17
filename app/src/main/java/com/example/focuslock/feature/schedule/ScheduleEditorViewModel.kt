@@ -12,6 +12,7 @@ import com.example.focuslock.domain.model.RepeatRule
 import com.example.focuslock.domain.repository.AllowedAppsRepository
 import com.example.focuslock.domain.repository.ScheduleRepository
 import com.example.focuslock.domain.usecase.DeleteScheduleUseCase
+import com.example.focuslock.domain.usecase.DeviceOwnerStatus
 import com.example.focuslock.domain.usecase.SaveScheduleUseCase
 import com.example.focuslock.domain.usecase.ScheduleChangeResult
 import com.example.focuslock.ui.navigation.Routes
@@ -91,6 +92,8 @@ data class ScheduleEditorUiState(
     val isEditing: Boolean = false,
     val form: ScheduleForm = ScheduleForm(),
     val allowedAppCount: Int = 0,
+    /** Strict mode is only offered on a Device Owner device, where it is truly unexitable. */
+    val strictAvailable: Boolean = true,
     val error: ScheduleValidationError? = null,
     val lockedBySession: Boolean = false,
     val review: FocusSchedule? = null,
@@ -107,8 +110,11 @@ class ScheduleEditorViewModel @Inject constructor(
     private val scheduleRepository: ScheduleRepository,
     private val saveSchedule: SaveScheduleUseCase,
     private val deleteSchedule: DeleteScheduleUseCase,
+    private val deviceOwnerStatus: DeviceOwnerStatus,
     private val timeSource: TimeSource,
 ) : ViewModel() {
+
+    private val strictAvailable = MutableStateFlow(true)
 
     private val scheduleId: String? = savedStateHandle[Routes.ARG_SCHEDULE_ID]
     private val state = MutableStateFlow(EditorState())
@@ -116,12 +122,14 @@ class ScheduleEditorViewModel @Inject constructor(
     val uiState: StateFlow<ScheduleEditorUiState> = combine(
         state,
         allowedAppsRepository.observeAllowed().map { it.size },
-    ) { s, appCount ->
+        strictAvailable,
+    ) { s, appCount, strictOk ->
         ScheduleEditorUiState(
             loading = s.loading,
             isEditing = s.existing != null,
             form = s.form,
             allowedAppCount = appCount,
+            strictAvailable = strictOk,
             error = s.error,
             lockedBySession = s.lockedBySession,
             review = s.review,
@@ -132,6 +140,7 @@ class ScheduleEditorViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), ScheduleEditorUiState())
 
     init {
+        refreshDeviceOwner()
         viewModelScope.launch {
             val existing = scheduleId?.let { scheduleRepository.getSchedule(it) }
             state.update {
@@ -142,6 +151,10 @@ class ScheduleEditorViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    fun refreshDeviceOwner() {
+        viewModelScope.launch { strictAvailable.value = deviceOwnerStatus.isDeviceOwner() }
     }
 
     fun updateForm(transform: (ScheduleForm) -> ScheduleForm) =
@@ -159,7 +172,13 @@ class ScheduleEditorViewModel @Inject constructor(
             val candidate = buildSchedule(current)
             val now = timeSource.now()
             val zone = timeSource.zone()
-            val error = ScheduleValidator.validate(candidate, scheduleRepository.getSchedules(), now, zone)
+            val error = ScheduleValidator.validate(
+                candidate,
+                scheduleRepository.getSchedules(),
+                now,
+                zone,
+                deviceOwnerStatus.isDeviceOwner(),
+            )
             val startsNow = candidate.enabled && candidate.autoStart &&
                 ScheduleCalculator.activeWindows(listOf(candidate), now, zone).isNotEmpty()
             state.update {

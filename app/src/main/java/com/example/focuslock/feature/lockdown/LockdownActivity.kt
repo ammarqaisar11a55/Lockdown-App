@@ -87,6 +87,13 @@ class LockdownActivity : ComponentActivity() {
         viewModel.onResumed()
     }
 
+    override fun onStop() {
+        super.onStop()
+        // Without Device Owner the user can decline or leave pinning; ask again whenever the
+        // lockdown screen is shown again rather than giving up for the rest of the session.
+        if (!isChangingConfigurations) pinningRequested = false
+    }
+
     override fun onUserLeaveHint() {
         super.onUserLeaveHint()
         // Reached only when Android lets the user navigate away (screen pinning fallback).

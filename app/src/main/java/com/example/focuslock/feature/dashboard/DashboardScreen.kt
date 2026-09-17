@@ -158,6 +158,7 @@ fun DashboardScreen(
 
     if (showFocusNow) {
         FocusNowDialog(
+            strictAvailable = state.isDeviceOwner,
             onDismiss = { showFocusNow = false },
             onConfirm = { minutes, strict, name ->
                 showFocusNow = false
@@ -468,7 +469,7 @@ private fun TodayList(items: List<TodayItem>) {
 }
 
 @Composable
-private fun FocusNowDialog(onDismiss: () -> Unit, onConfirm: (Int, Boolean, String) -> Unit) {
+private fun FocusNowDialog(strictAvailable: Boolean, onDismiss: () -> Unit, onConfirm: (Int, Boolean, String) -> Unit) {
     var minutes by rememberSaveable { mutableIntStateOf(FOCUS_NOW_OPTIONS[1]) }
     var strict by rememberSaveable { mutableStateOf(false) }
     var name by rememberSaveable { mutableStateOf("") }
@@ -476,7 +477,7 @@ private fun FocusNowDialog(onDismiss: () -> Unit, onConfirm: (Int, Boolean, Stri
         onDismiss = onDismiss,
         title = stringResource(R.string.dashboard_focus_now),
         confirmLabel = stringResource(R.string.action_start_now),
-        onConfirm = { onConfirm(minutes, strict, name) },
+        onConfirm = { onConfirm(minutes, strict && strictAvailable, name) },
     ) {
         FieldLabel(stringResource(R.string.editor_name), Modifier.padding(top = 6.dp))
         FlTextField(
@@ -496,7 +497,13 @@ private fun FocusNowDialog(onDismiss: () -> Unit, onConfirm: (Int, Boolean, Stri
                 )
             }
         }
-        SwitchRow(stringResource(R.string.editor_strict), strict, { strict = it })
+        SwitchRow(
+            title = stringResource(R.string.editor_strict),
+            subtitle = if (strictAvailable) null else stringResource(R.string.editor_strict_needs_owner),
+            checked = strict && strictAvailable,
+            onCheckedChange = { strict = it },
+            enabled = strictAvailable,
+        )
         MutedText(stringResource(R.string.focus_now_warning), style = LockdownType.caption)
     }
 }

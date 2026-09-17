@@ -29,6 +29,9 @@ enum class CapabilityId {
     APPLICATION_MANAGEMENT,
     AUTOMATIC_TIME,
     BATTERY,
+
+    /** Without Device Owner: Android's own "Ask for PIN before unpinning" option. */
+    PINNING_LOCK,
 }
 
 data class DeviceCapabilities(

@@ -68,6 +68,11 @@ class PolicyReconciliationEngine @Inject constructor(
     override suspend fun startFocusNow(name: String, duration: Duration, strictMode: Boolean): Boolean =
         serialized {
             if (duration < MIN_AD_HOC_DURATION || duration > MAX_AD_HOC_DURATION) return@serialized false
+            // Strict means unexitable, which only lock task mode under Device Owner provides.
+            if (strictMode && !enforcer.isDeviceOwner()) {
+                logger.warn(TAG, "Strict session refused: Device Owner required")
+                return@serialized false
+            }
             val current = reconcileLocked(ReconcileTrigger.USER_ACTION)
             if (current.isLocked) return@serialized false
             val input = buildInput()
@@ -219,7 +224,12 @@ class PolicyReconciliationEngine @Inject constructor(
             current.historyId?.let { historyRepository.incrementRecoveryCount(it) }
             logger.info(TAG, "Session recovered after $trigger")
         }
-        if (!enforcer.isLockTaskActive()) launcher.launchLockdownScreen()
+        // Only a Device Owner session may pull the lockdown screen back. Screen pinning is a
+        // voluntary mode: once the user unpins, the app must not trap them by relaunching.
+        val managed = current.enforcement == EnforcementLevel.DEVICE_OWNER
+        if (managed && trigger.restoresScreen && !enforcer.isLockTaskActive()) {
+            launcher.launchLockdownScreen()
+        }
         notifier.showActive(window, current.enforcement ?: EnforcementLevel.SCREEN_PINNING)
         return current
     }

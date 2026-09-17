@@ -261,6 +261,14 @@
     <string name="notification_completed_text">Duration: %1$s. Great work.</string>
     <string name="notification_completed_big">%1$s\nDuration: %2$s\n\nGreat work.</string>
 
+    <!-- Strict mode requires Device Owner -->
+    <string name="editor_strict_needs_owner">Requires Device Owner setup on this phone</string>
+    <string name="error_strict_needs_owner">Strict mode needs Device Owner setup. Without it Android always lets you unpin.</string>
+    <string name="strict_unavailable_title">Strict mode needs device setup</string>
+    <string name="strict_unavailable_body">Strict sessions cannot be exited, which Android only allows when Lockdown App is the Device Owner of this phone.\n\nWithout it, Android uses screen pinning, and the unpin gesture always works. That is an Android safety rule no app can override.\n\nSetting up Device Owner requires a phone without accounts, usually a freshly reset one.</string>
+    <string name="cap_title_pinning_lock">Unpinning lock</string>
+    <string name="cap_pinning_lock">Sessions use screen pinning here. Turn on “Ask for PIN before unpinning” (Security › App pinning) so leaving locks the phone.</string>
+
     <!-- Design refresh -->
     <string name="greeting_morning">Good morning</string>
     <string name="greeting_afternoon">Good afternoon</string>

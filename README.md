@@ -20,7 +20,7 @@ user restrictions). No root, no accessibility-service tricks, no overlays, no hi
 | Schedules | One-time, daily, weekdays, custom days; several sessions per day; overnight sessions; overlap prevention |
 | Focus now | Ad-hoc 25/50/90-minute sessions |
 | Enforcement | Device Owner lock task (kiosk) mode with an allowlist, HOME override, uninstall block and user restrictions; screen-pinning fallback without Device Owner |
-| Strict mode | Additional restrictions (install apps, add/switch users, debugging in release builds) |
+| Strict mode | Unexitable sessions: only available when the app is Device Owner (lock task mode, no unpin gesture), plus extra restrictions (install apps, add/switch users, debugging in release builds) |
 | Countdown | Optional cancellable countdown (1/5/10 min) and reminder notification before a session |
 | Recovery | Reboot, process death, time/timezone change, missed alarms, policy drift |
 | Dashboard | Today's progress, planned vs. focused time, weekly total, completed sessions, exit attempts, upcoming sessions |
@@ -136,7 +136,9 @@ Lockdown App distinguishes four capability levels throughout the docs:
 
 Key points:
 
-- Without Device Owner, sessions use **screen pinning**, which the user can exit.
+- Without Device Owner, sessions use **screen pinning**, which the user can always exit — Android
+  guarantees this and no app can override it. For that reason **Strict mode is only offered on a
+  Device Owner phone**; elsewhere the app points to Android's "Ask for PIN before unpinning" option.
 - Emergency calls, the power menu, the secure lock screen, recovery mode and **factory reset** are
   never blocked. A factory reset removes Lockdown App.
 - On Android 14+, exact alarms are denied by default; until the user allows them a session may start

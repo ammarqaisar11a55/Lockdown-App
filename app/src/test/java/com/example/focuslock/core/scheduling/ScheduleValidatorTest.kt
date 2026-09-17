@@ -12,8 +12,11 @@ import org.junit.Test
 class ScheduleValidatorTest {
     private val now = at(WEDNESDAY, "10:00")
 
-    private fun validate(candidate: com.example.focuslock.domain.model.FocusSchedule, existing: List<com.example.focuslock.domain.model.FocusSchedule> = emptyList()) =
-        ScheduleValidator.validate(candidate, existing, now, UTC)
+    private fun validate(
+        candidate: com.example.focuslock.domain.model.FocusSchedule,
+        existing: List<com.example.focuslock.domain.model.FocusSchedule> = emptyList(),
+        isDeviceOwner: Boolean = true,
+    ) = ScheduleValidator.validate(candidate, existing, now, UTC, isDeviceOwner)
 
     @Test
     fun `valid schedule passes`() = assertNull(validate(schedule()))
@@ -40,6 +43,15 @@ class ScheduleValidatorTest {
     @Test
     fun `one-time schedule later today is accepted`() =
         assertNull(validate(schedule(start = "15:00", end = "16:00", repeat = RepeatRule.Once(WEDNESDAY))))
+
+    @Test
+    fun `strict schedules require device owner`() {
+        assertEquals(ScheduleValidationError.StrictNeedsDeviceOwner, validate(schedule(strict = true), isDeviceOwner = false))
+        assertNull(validate(schedule(strict = true), isDeviceOwner = true))
+        assertNull(validate(schedule(strict = false), isDeviceOwner = false))
+        // A disabled strict schedule may be kept around on an unmanaged device.
+        assertNull(validate(schedule(strict = true, enabled = false), isDeviceOwner = false))
+    }
 
     @Test
     fun `overlap reports the conflicting schedule`() = assertEquals(

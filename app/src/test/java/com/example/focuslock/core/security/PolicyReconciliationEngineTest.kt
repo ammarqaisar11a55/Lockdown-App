@@ -207,6 +207,36 @@ class PolicyReconciliationEngineTest {
     }
 
     @Test
+    fun `screen pinning sessions never relaunch the lockdown screen after the user leaves`() = runTest {
+        enforcer.deviceOwner = false
+        time.now = at(WEDNESDAY, "08:00")
+        engine.reconcile(ReconcileTrigger.ALARM)
+        assertEquals(1, launcher.launches) // shown once when the session starts
+
+        enforcer.lockTaskActive = false // user unpinned
+        ReconcileTrigger.entries.forEach { trigger ->
+            time.advance(Duration.ofSeconds(1))
+            engine.reconcile(trigger)
+        }
+        assertEquals(1, launcher.launches)
+        assertTrue(stateRepository.state.value.isLocked)
+    }
+
+    @Test
+    fun `device owner sessions relaunch only for background triggers`() = runTest {
+        time.now = at(WEDNESDAY, "08:00")
+        engine.reconcile(ReconcileTrigger.ALARM)
+        enforcer.lockTaskActive = false
+
+        engine.reconcile(ReconcileTrigger.APP_FOREGROUND)
+        engine.reconcile(ReconcileTrigger.SESSION_TIMER)
+        assertEquals(1, launcher.launches)
+
+        engine.reconcile(ReconcileTrigger.TIME_CHANGED)
+        assertEquals(2, launcher.launches)
+    }
+
+    @Test
     fun `gaining device owner mid-session upgrades enforcement`() = runTest {
         enforcer.deviceOwner = false
         time.now = at(WEDNESDAY, "08:00")
@@ -268,6 +298,15 @@ class PolicyReconciliationEngineTest {
 
         assertFalse(engine.startFocusNow("Again", Duration.ofMinutes(25), strictMode = false))
         assertFalse(engine.startFocusNow("Too short", Duration.ofSeconds(1), strictMode = false))
+    }
+
+    @Test
+    fun `strict focus now is refused without device owner`() = runTest {
+        enforcer.deviceOwner = false
+        schedules.deleteAll()
+        assertFalse(engine.startFocusNow("Deep work", Duration.ofMinutes(25), strictMode = true))
+        assertFalse(stateRepository.state.value.isLocked)
+        assertTrue(engine.startFocusNow("Deep work", Duration.ofMinutes(25), strictMode = false))
     }
 
     @Test

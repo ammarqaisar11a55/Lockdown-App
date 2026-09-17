@@ -37,4 +37,5 @@ fun ScheduleValidationError.message(): String = when (this) {
     ScheduleValidationError.NoDaysSelected -> stringResource(R.string.error_no_days)
     ScheduleValidationError.InThePast -> stringResource(R.string.error_in_past)
     is ScheduleValidationError.Overlaps -> stringResource(R.string.error_overlap, conflictingName)
+    ScheduleValidationError.StrictNeedsDeviceOwner -> stringResource(R.string.error_strict_needs_owner)
 }

@@ -29,6 +29,9 @@ What Android does and does not let Lockdown App do. Levels:
   80 seconds on the API 35 emulator). A Device Owner cannot grant this app-op through
   `setPermissionGrantState`. `USE_EXACT_ALARM` is reserved by Play policy for alarm/calendar apps
   and is not used.
+- **Strict mode:** requires Device Owner. Strict schedules cannot be enabled, and Strict "Focus now"
+  cannot start, on an unmanaged phone, so Strict never silently degrades to exitable pinning. A
+  strict schedule that becomes active after Device Owner was removed still runs, with pinning.
 - **Screen pinning (no Device Owner):** the user confirms it and can leave it (Back + Overview,
   or as configured on the device). Lockdown App counts exit attempts and offers a way back through
   its notification, but cannot prevent leaving.

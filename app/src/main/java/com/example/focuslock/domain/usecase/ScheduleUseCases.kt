@@ -23,6 +23,7 @@ class SaveScheduleUseCase @Inject constructor(
     private val scheduleRepository: ScheduleRepository,
     private val stateRepository: LockdownStateRepository,
     private val coordinator: LockdownCoordinator,
+    private val deviceOwnerStatus: DeviceOwnerStatus,
     private val timeSource: TimeSource,
 ) {
     suspend operator fun invoke(schedule: FocusSchedule): ScheduleChangeResult {
@@ -33,6 +34,7 @@ class SaveScheduleUseCase @Inject constructor(
             scheduleRepository.getSchedules(),
             timeSource.now(),
             timeSource.zone(),
+            deviceOwnerStatus.isDeviceOwner(),
         )
         if (error != null) return ScheduleChangeResult.Invalid(error)
         scheduleRepository.save(normalized)
@@ -58,11 +60,15 @@ class SetScheduleEnabledUseCase @Inject constructor(
     private val scheduleRepository: ScheduleRepository,
     private val stateRepository: LockdownStateRepository,
     private val coordinator: LockdownCoordinator,
+    private val deviceOwnerStatus: DeviceOwnerStatus,
 ) {
     suspend operator fun invoke(id: String, enabled: Boolean): ScheduleChangeResult {
         if (isEnforced(stateRepository, id)) return ScheduleChangeResult.LockedBySession
         val schedule = scheduleRepository.getSchedule(id) ?: return ScheduleChangeResult.Success
         if (enabled) {
+            if (schedule.strictMode && !deviceOwnerStatus.isDeviceOwner()) {
+                return ScheduleChangeResult.Invalid(ScheduleValidationError.StrictNeedsDeviceOwner)
+            }
             val conflict = ScheduleOverlapChecker.findConflict(schedule.copy(enabled = true), scheduleRepository.getSchedules())
             if (conflict != null) {
                 return ScheduleChangeResult.Invalid(ScheduleValidationError.Overlaps(conflict.name))
@@ -72,6 +78,11 @@ class SetScheduleEnabledUseCase @Inject constructor(
         coordinator.reconcile(ReconcileTrigger.SCHEDULES_CHANGED)
         return ScheduleChangeResult.Success
     }
+}
+
+/** Whether this app is the Device Owner, read off the main thread. */
+fun interface DeviceOwnerStatus {
+    suspend fun isDeviceOwner(): Boolean
 }
 
 private suspend fun isEnforced(stateRepository: LockdownStateRepository, scheduleId: String): Boolean {
